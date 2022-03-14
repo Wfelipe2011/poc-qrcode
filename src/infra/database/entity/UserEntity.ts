@@ -1,17 +1,13 @@
-import { mongoose } from "../MondoDBAdapter/infra";
+import mongoose from "mongoose";
 export interface IUser {
-  name: string;
+    name: string;
 }
 
 const UserEntity = {
-  ['#']: String,
-  ['(VLTRR$)*']: String,
-  COD: String,
-  DESCRIÇÃO: String,
-  QTD: String,
-  UN: String,
-  VLITEMR$: String,
-  VLUNR$: String,
+    name: {
+        type: String,
+        required: true,
+    },
 };
 
 export const User = mongoose.model("user", new mongoose.Schema(UserEntity));

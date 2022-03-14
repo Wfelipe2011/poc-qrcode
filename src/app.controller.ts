@@ -2,13 +2,14 @@ import { Body, Controller, Get, Post } from '@nestjs/common';
 import { AppService } from './app.service';
 
 import * as puppeteer from 'puppeteer';
+import { logger } from 'skyot';
 
 const request = require('request-promise-native');
 const poll = require('promise-poller').default;
 
 const code = " 35220356527062010769590009174140104486983850"
 
-const API_KEY = ""
+const API_KEY = process.env.CAPTCHA_API_KEY
 
 async function curl(options) {
   return new Promise((resolve, reject) => {
@@ -65,6 +66,12 @@ async function resolve_captcha_v2(google_key, site_url) {
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) { }
+
+  @Post()
+  teste(@Body() name:any){
+    logger(JSON.stringify(name))
+return name
+  }
 
   @Get()
   async getHello() {

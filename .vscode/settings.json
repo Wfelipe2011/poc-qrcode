@@ -1,0 +1,26 @@
+{
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[javascript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[typescript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[vue]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[scss]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[css]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "editor.formatOnSave": true,
+  "material-icon-theme.folders.associations": {
+    "infra": "lib",
+    "useCase": "context",
+    "interface": "contract",
+    "entities": "components",
+    "dto": "interface"
+  },
+  "material-icon-theme.files.associations": {
+    "*.controller.ts": "nest-controller",
+    "*.module.ts": "nest-module",
+    "*.service.ts": "nest-service"
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll": true,
+    "source.fixAll.eslint": true,
+    "source.organizeImports": true
+  }
+}
