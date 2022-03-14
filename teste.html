@@ -1,193 +1,362 @@
 <hmtl>
-  <table cellspacing="0" id="tableItens" cellpadding="0">
-    <colgroup>
-      <col width="5%" />
-      <col width="5%" />
-      <col width="15%" />
-      <col width="5%" />
-      <col width="5%" />
-      <col width="10%" />
-      <col width="10%" />
-      <col width="10%" />
-      <col width="5%" />
-    </colgroup>
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>COD</th>
-        <th>DESCRIÇÃO</th>
-        <th>QTD</th>
-        <th>UN</th>
-        <th>VL UN R$</th>
-        <th>(VL TR R$)*</th>
-        <th style="border-right: 0px">VL ITEM R$</th>
-      </tr>
-      <tr></tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>1</td>
-        <td>152770</td>
-        <td>MAC ALHO/OLEO Q P</td>
-        <td>0,2659</td>
-        <td>KG</td>
-        <td>
-          <div style="position: relative; float: left">X</div>
-          29,90
-        </td>
-        <td>(2,50)</td>
-        <td>7,95</td>
-      </tr>
-      <tr>
-        <td colspan="7" style="text-align: left"></td>
-        <td>
-          <div style="text-align: right; margin-right: 24px"><br /></div>
-        </td>
-      </tr>
+  <div
+    id="conteudo_divMovimento"
+    style="
+      border: 1px solid #000;
+      min-height: 300px;
+      text-align: center;
+      padding: 5px;
+      background-color: #ffffcc;
+      width: 500px;
+    "
+  >
+    <center>
+      <div id="DadosEmitente1" style="width: 330px">
+        <div id="DadosEmitenteContent" style="text-align: center">
+          <div>
+            <span id="conteudo_lblNomeFantasiaEmitente"
+              >TAUSTE SUPERMERCADOS</span
+            >
+          </div>
+          <div>
+            <span id="conteudo_lblNomeEmitente">TAUSTE SUPERMERCADOS LTDA</span>
+          </div>
+          <div>
+            <span>Endereço: </span>
+            <span id="conteudo_lblEnderecoEmintente"
+              >AVENIDA GENERAL CARNEIRO, Nº 1120 - Nao Informado</span
+            ><br />
+            <span>Bairro: </span>
+            <span id="conteudo_lblBairroEmitente">VILA LUCY</span>&nbsp;-&nbsp;
+            <span>CEP: </span>
+            <span id="conteudo_lblCepEmitente">18043-003</span>&nbsp;-&nbsp;
+            <span id="conteudo_lblMunicipioEmitente">SOROCABA</span>
+            <span>- SP</span>
+          </div>
+        </div>
+      </div>
+    </center>
+    <div
+      id="DadosEmitente2"
+      style="text-align: center; width: 100%; padding-top: 8px"
+    >
+      <span>&nbsp;CNPJ:&nbsp;</span>
+      <span id="conteudo_lblCnpjEmitente">65.897.910/0014-89</span>
+      <span>&nbsp;I.E.:&nbsp;</span>
+      <span id="conteudo_lblIeEmitente">798388719112 </span>
+      <span>&nbsp;I.M.:&nbsp;</span>
+      <span id="conteudo_lblImEmintente"></span>
+    </div>
+    <span
+      >--------------------------------------------------------------------------------------------------------------</span
+    >
+    <div>
+      <div style="font-weight: bold">
+        <div>
+          <span>Extrato Nº:</span>
+          <span id="conteudo_lblNumeroCfe">065034</span>
+        </div>
+        <div>
+          <span>CUPOM FISCAL ELETRÔNICO - SAT</span>
+        </div>
+      </div>
+    </div>
+    <span
+      >--------------------------------------------------------------------------------------------------------------</span
+    >
+    <div id="Consumidor1" style="text-align: left; padding-left: 30px">
+      <span>CPF/CNPJ do Consumidor: </span>
+      <span id="conteudo_lblCpfConsumidor">XXX.XXX.XX8-67</span>
+    </div>
+    <div id="divRazaoSocial" style="text-align: left; padding-left: 30px">
+      <span>Razão Social/ Nome: </span>
+      <span id="conteudo_lblRazaoSocial">XXX</span>
+    </div>
+    <span
+      >--------------------------------------------------------------------------------------------------------------</span
+    >
+    <div>
+      <table cellspacing="0" id="tableItens" cellpadding="0">
+        <colgroup>
+          <col width="5%" />
+          <col width="5%" />
+          <col width="15%" />
+          <col width="5%" />
+          <col width="5%" />
+          <col width="10%" />
+          <col width="10%" />
+          <col width="10%" />
+          <col width="5%" />
+        </colgroup>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>COD</th>
+            <th>DESCRIÇÃO</th>
+            <th>QTD</th>
+            <th>UN</th>
+            <th>VL UN R$</th>
+            <th>(VL TR R$)*</th>
+            <th style="border-right: 0px">VL ITEM R$</th>
+          </tr>
+          <tr></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td>152770</td>
+            <td>MAC ALHO/OLEO Q P</td>
+            <td>0,2659</td>
+            <td>KG</td>
+            <td>
+              <div style="position: relative; float: left">X</div>
+              29,90
+            </td>
+            <td>(2,50)</td>
+            <td>7,95</td>
+          </tr>
+          <tr>
+            <td colspan="7" style="text-align: left"></td>
+            <td>
+              <div style="text-align: right; margin-right: 24px"><br /></div>
+            </td>
+          </tr>
 
-      <tr>
-        <td>2</td>
-        <td>84716</td>
-        <td>LASANHA PR/QJO EMB</td>
-        <td>0,4140</td>
-        <td>KG</td>
-        <td>
-          <div style="position: relative; float: left">X</div>
-          34,90
-        </td>
-        <td>(4,54)</td>
-        <td>14,45</td>
-      </tr>
-      <tr>
-        <td colspan="7" style="text-align: left"></td>
-        <td>
-          <div style="text-align: right; margin-right: 24px"><br /></div>
-        </td>
-      </tr>
+          <tr>
+            <td>2</td>
+            <td>84716</td>
+            <td>LASANHA PR/QJO EMB</td>
+            <td>0,4140</td>
+            <td>KG</td>
+            <td>
+              <div style="position: relative; float: left">X</div>
+              34,90
+            </td>
+            <td>(4,54)</td>
+            <td>14,45</td>
+          </tr>
+          <tr>
+            <td colspan="7" style="text-align: left"></td>
+            <td>
+              <div style="text-align: right; margin-right: 24px"><br /></div>
+            </td>
+          </tr>
 
-      <tr>
-        <td>3</td>
-        <td>97642</td>
-        <td>IOG VIGOR GRE TRAD</td>
-        <td>1,0000</td>
-        <td>PO</td>
-        <td>
-          <div style="position: relative; float: left">X</div>
-          2,25
-        </td>
-        <td>(0,51)</td>
-        <td>2,25</td>
-      </tr>
-      <tr>
-        <td colspan="7" style="text-align: left"></td>
-        <td>
-          <div style="text-align: right; margin-right: 24px"><br /></div>
-        </td>
-      </tr>
+          <tr>
+            <td>3</td>
+            <td>97642</td>
+            <td>IOG VIGOR GRE TRAD</td>
+            <td>1,0000</td>
+            <td>PO</td>
+            <td>
+              <div style="position: relative; float: left">X</div>
+              2,25
+            </td>
+            <td>(0,51)</td>
+            <td>2,25</td>
+          </tr>
+          <tr>
+            <td colspan="7" style="text-align: left"></td>
+            <td>
+              <div style="text-align: right; margin-right: 24px"><br /></div>
+            </td>
+          </tr>
 
-      <tr>
-        <td>4</td>
-        <td>98840</td>
-        <td>IOG VIGOR GRE FR VER</td>
-        <td>1,0000</td>
-        <td>PO</td>
-        <td>
-          <div style="position: relative; float: left">X</div>
-          2,25
-        </td>
-        <td>(0,51)</td>
-        <td>2,25</td>
-      </tr>
-      <tr>
-        <td colspan="7" style="text-align: left"></td>
-        <td>
-          <div style="text-align: right; margin-right: 24px"><br /></div>
-        </td>
-      </tr>
+          <tr>
+            <td>4</td>
+            <td>98840</td>
+            <td>IOG VIGOR GRE FR VER</td>
+            <td>1,0000</td>
+            <td>PO</td>
+            <td>
+              <div style="position: relative; float: left">X</div>
+              2,25
+            </td>
+            <td>(0,51)</td>
+            <td>2,25</td>
+          </tr>
+          <tr>
+            <td colspan="7" style="text-align: left"></td>
+            <td>
+              <div style="text-align: right; margin-right: 24px"><br /></div>
+            </td>
+          </tr>
 
-      <tr>
-        <td>5</td>
-        <td>77592</td>
-        <td>FIL PAP BRIGITTA 103</td>
-        <td>1,0000</td>
-        <td>CX</td>
-        <td>
-          <div style="position: relative; float: left">X</div>
-          3,66
-        </td>
-        <td>(1,19)</td>
-        <td>3,66</td>
-      </tr>
-      <tr>
-        <td colspan="7" style="text-align: left"></td>
-        <td>
-          <div style="text-align: right; margin-right: 24px"><br /></div>
-        </td>
-      </tr>
+          <tr>
+            <td>5</td>
+            <td>77592</td>
+            <td>FIL PAP BRIGITTA 103</td>
+            <td>1,0000</td>
+            <td>CX</td>
+            <td>
+              <div style="position: relative; float: left">X</div>
+              3,66
+            </td>
+            <td>(1,19)</td>
+            <td>3,66</td>
+          </tr>
+          <tr>
+            <td colspan="7" style="text-align: left"></td>
+            <td>
+              <div style="text-align: right; margin-right: 24px"><br /></div>
+            </td>
+          </tr>
 
-      <tr>
-        <td>6</td>
-        <td>118160</td>
-        <td>SUCO PRATS LARANJA</td>
-        <td>1,0000</td>
-        <td>FR</td>
-        <td>
-          <div style="position: relative; float: left">X</div>
-          8,69
-        </td>
-        <td>(2,73)</td>
-        <td>8,69</td>
-      </tr>
-      <tr>
-        <td colspan="7" style="text-align: left"></td>
-        <td>
-          <div style="text-align: right; margin-right: 24px"><br /></div>
-        </td>
-      </tr>
+          <tr>
+            <td>6</td>
+            <td>118160</td>
+            <td>SUCO PRATS LARANJA</td>
+            <td>1,0000</td>
+            <td>FR</td>
+            <td>
+              <div style="position: relative; float: left">X</div>
+              8,69
+            </td>
+            <td>(2,73)</td>
+            <td>8,69</td>
+          </tr>
+          <tr>
+            <td colspan="7" style="text-align: left"></td>
+            <td>
+              <div style="text-align: right; margin-right: 24px"><br /></div>
+            </td>
+          </tr>
 
-      <tr>
-        <td>7</td>
-        <td>131586</td>
-        <td>CAFE PILAO TRAD BAG</td>
-        <td>1,0000</td>
-        <td>PC</td>
-        <td>
-          <div style="position: relative; float: left">X</div>
-          17,98
-        </td>
-        <td>(5,65)</td>
-        <td>17,98</td>
-      </tr>
-      <tr>
-        <td colspan="7" style="text-align: left"></td>
-        <td>
-          <div style="text-align: right; margin-right: 24px"><br /></div>
-        </td>
-      </tr>
+          <tr>
+            <td>7</td>
+            <td>131586</td>
+            <td>CAFE PILAO TRAD BAG</td>
+            <td>1,0000</td>
+            <td>PC</td>
+            <td>
+              <div style="position: relative; float: left">X</div>
+              17,98
+            </td>
+            <td>(5,65)</td>
+            <td>17,98</td>
+          </tr>
+          <tr>
+            <td colspan="7" style="text-align: left"></td>
+            <td>
+              <div style="text-align: right; margin-right: 24px"><br /></div>
+            </td>
+          </tr>
 
-      <tr>
-        <td>8</td>
-        <td>149852</td>
-        <td>BAT PA ELMA CH TRADI</td>
-        <td>1,0000</td>
-        <td>PC</td>
-        <td>
-          <div style="position: relative; float: left">X</div>
-          22,39
-        </td>
-        <td>(7,04)</td>
-        <td>22,39</td>
-      </tr>
-      <tr>
-        <td colspan="7" style="text-align: left"></td>
-        <td>
-          <div style="text-align: right; margin-right: 24px"><br /></div>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+          <tr>
+            <td>8</td>
+            <td>149852</td>
+            <td>BAT PA ELMA CH TRADI</td>
+            <td>1,0000</td>
+            <td>PC</td>
+            <td>
+              <div style="position: relative; float: left">X</div>
+              22,39
+            </td>
+            <td>(7,04)</td>
+            <td>22,39</td>
+          </tr>
+          <tr>
+            <td colspan="7" style="text-align: left"></td>
+            <td>
+              <div style="text-align: right; margin-right: 24px"><br /></div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <br />
+    <div id="CupomDetalhe1" style="float: left; width: 100%">
+      <div id="CupomLineTDA">
+        <div style="float: left">
+          Total de descontos/ acréscimos sobre o item
+        </div>
+        <div style="text-align: right">
+          <asp:label id="lblDesconto" runat="server" style="margin-right: 24px"
+            >0,00</asp:label
+          >
+        </div>
+      </div>
+      <div id="CupomLine4">
+        <div style="float: left">TOTAL R$</div>
+        <div style="text-align: right; margin-right: 24px">
+          <span id="conteudo_lblTotal">79,62</span>
+        </div>
+      </div>
+      <div></div>
+    </div>
+    <br />
+    <div id="conteudo_DivMeiosPagamento">
+      <div style="float: left; width: 100%">
+        <div style="float: left">Cartão de Crédito</div>
+        <div style="float: right; margin-right: 24px">79,62</div>
+      </div>
+      <br />
+      <div style="float: left; width: 100%">
+        <div id="CupomDetalhe2" style="float: left">Troco R$:</div>
+        <div style="float: right; margin-right: 24px">
+          <asp:label id="lblTroco" runat="server">0,00</asp:label>
+        </div>
+      </div>
+      <br />
+    </div>
+    <div style="text-align: left; padding-left: 30px">
+      Comete crime quem sonega
+    </div>
+    <span
+      >--------------------------------------------------------------------------------------------------------------</span
+    ><br />
+
+    <div style="text-align: left">OBSERVAÇÕES DO CONTRIBUINTE</div>
+    <div style="text-align: left">
+      <span
+        id="conteudo_lblObservacaoContribuinte"
+        style="display: inline-block; width: 95%"
+      ></span>
+    </div>
+    <br />
+
+    <div style="text-align: left">*Valor aproximado dos tributos do item</div>
+    <br />
+    <div style="text-align: left; float: left; position: relative">
+      Valor aproximado dos tributos deste cupom R$
+    </div>
+    <div style="float: right; position: relative; margin-right: 24px">
+      <span id="conteudo_lblTotal12741"
+        ><div style="text-align: left; padding-left: 30px">24,67</div></span
+      >
+    </div>
+    <br />
+    <div style="text-align: left">(conforme Lei Fed. 12.741/2012)</div>
+
+    <span
+      >--------------------------------------------------------------------------------------------------------------</span
+    >
+
+    <div>
+      <div style="font-weight: bold">
+        <span>SAT Nº </span>
+        <span id="conteudo_lblSatNumeroSerie">000875827-16</span>
+      </div>
+      <div>
+        <span id="conteudo_lblDataEmissao">27/02/2022 - 21:43:07</span>
+      </div>
+      <div>
+        <span id="conteudo_lblIdCfe"
+          >3522 0265 8979 1000 1489 5900 0875 8270 6503 4114 7749</span
+        >
+      </div>
+    </div>
+  </div>
   <script>
-    
-   
+    const tableItens = document.querySelector('#tableItens');
+    const regexHtml = /(<([^>]+)>)/gi;
+    const regexSpace = /(\r\n|\n|\r)/gm;
+    const htmlClean = tableItens.innerHTML
+      .replace(regexHtml, '')
+      .replace(regexSpace, '')
+      .replace(/( )+/g, ' ');
+
+    console.log(htmlClean);
   </script>
 </hmtl>
