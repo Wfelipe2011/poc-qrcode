@@ -6,6 +6,7 @@ import {
   Param,
   Post,
 } from '@nestjs/common';
+import { logger } from 'skyot';
 import { AppService } from './app.service';
 import { User } from './database/entity/UserEntity';
 import { Repository } from './database/repository/Repository';
@@ -39,6 +40,7 @@ export class AppController {
     data.forEach((body) => {
       new SatService().execute(body);
     });
+    logger(`Job está processando ${data.length} notas`);
     return `Job está processando ${data.length} notas`;
   }
 
