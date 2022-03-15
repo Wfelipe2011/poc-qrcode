@@ -1,3 +1,4 @@
+import { BadRequestException } from '@nestjs/common';
 import * as puppeteer from 'puppeteer';
 import { logger } from 'skyot';
 import { User } from 'src/database/entity/UserEntity';
@@ -65,33 +66,39 @@ export class SatService {
       };
     };
     await sleep(10);
-    logger('Começou a minerar html...');
-    let { table, emitContent, satNumber, dateEmit, barCode, cnpj, ie } =
-      await page.evaluate(dataMining);
+    logger('Comecou a minerar html...');
+    try {
+      let { table, emitContent, satNumber, dateEmit, barCode, cnpj, ie } =
+        await page.evaluate(dataMining);
 
-    const listEmitContent = [
-      ...treatmentsInnerHtml(emitContent),
-      ...treatmentsInnerHtml(cnpj),
-      ...treatmentsInnerHtml(ie),
-    ];
-    const newLocal = {
-      dateEmit: treatmentsInnerHtml(dateEmit)[0],
-      satNumber: treatmentsInnerHtml(satNumber)[0],
-      barCode: treatmentsInnerHtml(barCode)[0],
-      emitContent: treatmentsEmitContent(listEmitContent),
-      products: treatmentsTable(table),
-    };
-    const dateProcess = new Date().toLocaleString('en', {
-      timeZone: 'America/Sao_Paulo',
-    });
-    const newObject = {
-      date_processed: dateProcess,
-      nota: newLocal,
-    };
+      const listEmitContent = [
+        ...treatmentsInnerHtml(emitContent),
+        ...treatmentsInnerHtml(cnpj),
+        ...treatmentsInnerHtml(ie),
+      ];
+      const newLocal = {
+        dateEmit: treatmentsInnerHtml(dateEmit)[0],
+        satNumber: treatmentsInnerHtml(satNumber)[0],
+        barCode: treatmentsInnerHtml(barCode)[0],
+        emitContent: treatmentsEmitContent(listEmitContent),
+        products: treatmentsTable(table),
+      };
+      const dateProcess = new Date().toLocaleString('en', {
+        timeZone: 'America/Sao_Paulo',
+      });
+      const newObject = {
+        date_processed: dateProcess,
+        nota: newLocal,
+        status: true,
+      };
 
-    logger(`Salvando no banco a nota ${code} as ${dateProcess}`);
-    await this.repository.update({ code }, newObject);
-    logger(`Salvo com sucesso a nota ${code}`);
+      logger(`Salvando no banco a nota ${code} as ${dateProcess}`);
+      await this.repository.update({ code }, newObject);
+      logger(`Salvo com sucesso a nota ${code}`);
+    } catch (error) {
+      logger('Erro ao minerar html');
+      throw new BadRequestException(error);
+    }
   }
 
   async passarAcess(page, site_key, site_url, code) {

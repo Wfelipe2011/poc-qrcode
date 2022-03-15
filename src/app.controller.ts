@@ -2,7 +2,9 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
+  NotAcceptableException,
   Param,
   Post,
 } from '@nestjs/common';
@@ -13,13 +15,16 @@ import { Repository } from './database/repository/Repository';
 import { SatService } from './module/SAT/sat.service';
 
 export interface NotesBody {
+  _id?: string;
   code: string;
   email: string;
-  date_processed: Date;
-  date_created: string;
-  status: boolean;
-  nota: any;
+  date_processed?: Date;
+  date_created?: string;
+  status?: boolean;
+  nota?: any;
 }
+
+const listaAceitas = ['59'];
 
 @Controller()
 export class AppController {
@@ -36,6 +41,7 @@ export class AppController {
   @Get('job')
   async startJob() {
     const data = await this.repository.find<NotesBody>({ status: false });
+    if (!data.length) return;
     data.forEach((body) => {
       new SatService().execute(body);
     });
@@ -43,11 +49,25 @@ export class AppController {
     return `Job está processando ${data.length} notas`;
   }
 
+  @Delete()
+  async delete() {
+    const data = await this.repository.find<NotesBody>();
+    data.forEach(async (body) => {
+      await this.repository.delete(body._id);
+    });
+  }
+
   @Post()
   async getHello(
     @Body()
     body: NotesBody,
   ) {
+    if (!body?.code) throw new BadRequestException('Opa!');
+
+    const codeModel = `${body.code[20]}${body.code[21]}`;
+    if (!listaAceitas.includes(codeModel))
+      throw new NotAcceptableException('Não temos suporte para essa nota');
+
     logger(`${body.email} solicitou um processamento da nota ${body.code}`);
     this.setInitialBodyValues(body);
     try {
@@ -56,6 +76,7 @@ export class AppController {
       logger('salvo com sucesso.');
       return 'Sua nota está sendo processada, consulte o status dentro de alguns minutos';
     } catch (error) {
+      logger('Essa nota ja foi processada');
       throw new BadRequestException('Essa nota já foi processada');
     }
   }
