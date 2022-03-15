@@ -95,7 +95,7 @@ export class SatService {
   }
 
   async passarAcess(page, site_key, site_url, code) {
-    let captcha_token = await resolve_captcha_v2(site_key, site_url);
+    let captcha_token = await resolve_captcha_v2(site_key, site_url, code);
     if (!captcha_token) return logger('Falha ao obter o TOKEN 😤');
     logger('Passou do captcha');
     await page.type('[id="conteudo_txtChaveAcesso"]', ' ' + code);

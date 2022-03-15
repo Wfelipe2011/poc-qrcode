@@ -4,7 +4,11 @@ const request = require('request-promise-native');
 
 const API_KEY = process.env.CAPTCHA_API_KEY;
 
-export async function resolve_captcha_v2(google_key: string, site_url: string) {
+export async function resolve_captcha_v2(
+  google_key: string,
+  site_url: string,
+  code,
+) {
   let unparsed_captcha_id = await curl({
     method: 'GET',
     url: `https://2captcha.com/in.php?key=${API_KEY}&method=userrecaptcha&googlekey=${google_key}&pageurl=${site_url}&json=true`,
@@ -15,7 +19,7 @@ export async function resolve_captcha_v2(google_key: string, site_url: string) {
 
   while (1) {
     await sleep(10);
-    logger('verificando se o captcha esta pronto...');
+    logger(`[${code}]: verificando se o captcha esta pronto...`);
     let captcha_ready = await curl({
       method: 'GET',
       url: `https://2captcha.com/res.php?key=${API_KEY}&action=get&id=${captcha_id}&json=true`,
@@ -38,7 +42,6 @@ export async function curl(options) {
 }
 
 export async function sleep(sec) {
-  logger('sleep...');
   return new Promise<void>((resolve, reject) => {
     setTimeout(function () {
       resolve();

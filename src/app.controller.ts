@@ -36,11 +36,10 @@ export class AppController {
   @Get('job')
   async startJob() {
     const data = await this.repository.find<NotesBody>({ status: false });
-    // descobrir qual é a nota
     data.forEach((body) => {
       new SatService().execute(body);
     });
-    logger(`Job está processando ${data.length} notas`);
+    logger(`Job esta processando ${data.length} notas`);
     return `Job está processando ${data.length} notas`;
   }
 
@@ -49,16 +48,17 @@ export class AppController {
     @Body()
     body: NotesBody,
   ) {
+    logger(`${body.email} solicitou um processamento da nota ${body.code}`);
     this.setInitialBodyValues(body);
-    // salvar banco
     try {
+      logger('salvando...');
       await this.repository.save(body);
+      logger('salvo com sucesso.');
       return 'Sua nota está sendo processada, consulte o status dentro de alguns minutos';
     } catch (error) {
       throw new BadRequestException('Essa nota já foi processada');
     }
   }
-  // new SatService().execute(' ' + body.code);
 
   private setInitialBodyValues(body: NotesBody) {
     const [created] = new Date()
