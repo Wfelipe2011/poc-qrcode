@@ -16,15 +16,15 @@ export class SatService {
     });
     const page = await browser.newPage();
     let site_key = '6LeEy8wUAAAAAHN6Wu2rNdku25fyHUVgovX-rJqM';
-    let site_url = 'http://127.0.0.1:5500/teste.html';
-    //   'https://satsp.fazenda.sp.gov.br/COMSAT/Public/ConsultaPublica/ConsultaPublicaCfe.aspx';
+    let site_url =
+      'https://satsp.fazenda.sp.gov.br/COMSAT/Public/ConsultaPublica/ConsultaPublicaCfe.aspx';
 
-    await page.goto(site_url);
+    await page.goto(site_url, { waitUntil: 'domcontentloaded' });
 
     await page.evaluate(() => {
       // pegar site_key dinamicamente
     });
-    // await this.passarAcess(page, site_key, site_url, code);
+    await this.passarAcess(page, site_key, site_url, code);
 
     // garimpar os dados
 
@@ -85,7 +85,7 @@ export class SatService {
     if (!captcha_token) return logger('Falha ao obter o TOKEN 😤');
 
     logger('Passou do captcha');
-    await page.type('[id="conteudo_txtChardAcesso"]', code);
+    await page.type('[id="conteudo_txtChaveAcesso"]', code);
 
     await page.evaluate(
       `document.getElementById("g-recaptcha-response").innerHTML="${captcha_token}";`,
@@ -97,6 +97,6 @@ export class SatService {
       input.setAttribute('id', 'my-submit');
     });
 
-    await page.click('[id="my-submit"]');
+    await page.click('[id="my-submit"]', { waitUntil: 'domcontentloaded' });
   }
 }
