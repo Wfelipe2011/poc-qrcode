@@ -1,3 +1,5 @@
+import { logger } from 'skyot';
+
 const request = require('request-promise-native');
 
 const API_KEY = process.env.CAPTCHA_API_KEY;
@@ -13,14 +15,20 @@ export async function resolve_captcha_v2(google_key: string, site_url: string) {
 
   while (1) {
     await sleep(10);
-    console.log('verificando se o captcha está pronto...');
+    logger('verificando se o captcha está pronto...');
     let captcha_ready = await curl({
       method: 'GET',
       url: `https://2captcha.com/res.php?key=${API_KEY}&action=get&id=${captcha_id}&json=true`,
     });
 
     let parsed_captcha_ready = JSON.parse(captcha_ready as any);
-    console.log(parsed_captcha_ready);
+
+    if (parsed_captcha_ready.status == 1) {
+      logger('o seu captcha esta pronto');
+    } else {
+      logger('ainda resolvendo captcha');
+    }
+
     if (parsed_captcha_ready.status == 1) return parsed_captcha_ready.request;
     else if (parsed_captcha_ready.request != 'CAPCHA_NOT_READY') return false;
   }
@@ -35,7 +43,8 @@ export async function curl(options) {
   });
 }
 
-async function sleep(sec) {
+export async function sleep(sec) {
+  logger('sleep...');
   return new Promise<void>((resolve, reject) => {
     setTimeout(function () {
       resolve();

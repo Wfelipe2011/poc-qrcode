@@ -1,6 +1,6 @@
 import * as puppeteer from 'puppeteer';
 import { logger } from 'skyot';
-import { resolve_captcha_v2 } from './useCase/ResolveCaptcha';
+import { resolve_captcha_v2, sleep } from './useCase/ResolveCaptcha';
 import {
   treatmentsEmitContent,
   treatmentsInnerHtml,
@@ -21,12 +21,7 @@ export class SatService {
 
     await page.goto(site_url, { waitUntil: 'domcontentloaded' });
 
-    await page.evaluate(() => {
-      // pegar site_key dinamicamente
-    });
     await this.passarAcess(page, site_key, site_url, code);
-
-    // garimpar os dados
 
     const dataMining = () => {
       const nodeListTable = document.querySelector('#tableItens')
@@ -62,7 +57,7 @@ export class SatService {
         ie,
       };
     };
-
+    await sleep(10);
     let { table, emitContent, satNumber, dateEmit, barCode, cnpj, ie } =
       await page.evaluate(dataMining);
 
@@ -83,20 +78,19 @@ export class SatService {
   async passarAcess(page, site_key, site_url, code) {
     let captcha_token = await resolve_captcha_v2(site_key, site_url);
     if (!captcha_token) return logger('Falha ao obter o TOKEN 😤');
-
     logger('Passou do captcha');
     await page.type('[id="conteudo_txtChaveAcesso"]', code);
-
+    logger('Está digitando...');
     await page.evaluate(
       `document.getElementById("g-recaptcha-response").innerHTML="${captcha_token}";`,
     );
-
+    logger('Fez o submit do formulario');
     await page.evaluate(() => {
       const input = document.querySelector('#conteudo_btnConsultar');
       input.removeAttribute('disabled');
       input.setAttribute('id', 'my-submit');
     });
-
-    await page.click('[id="my-submit"]', { waitUntil: 'domcontentloaded' });
+    logger('Esta aguardando o resultado...');
+    await page.click('[id="my-submit"]');
   }
 }
