@@ -1,5 +1,8 @@
 import * as puppeteer from 'puppeteer';
 import { logger } from 'skyot';
+import { User } from 'src/database/entity/UserEntity';
+import { Repository } from 'src/database/repository/Repository';
+import { NotesBody } from './../../app.controller';
 import { resolve_captcha_v2, sleep } from './useCase/ResolveCaptcha';
 import {
   treatmentsEmitContent,
@@ -7,11 +10,15 @@ import {
   treatmentsTable,
 } from './useCase/treatments';
 export class SatService {
-  constructor() {}
+  repository: Repository;
+  constructor() {
+    this.repository = new Repository(User);
+  }
 
-  async execute(code) {
+  async execute(body: NotesBody) {
+    const { code } = body;
     const browser = await puppeteer.launch({
-      headless: false,
+      headless: true,
       slowMo: 50,
     });
     const page = await browser.newPage();
@@ -58,6 +65,7 @@ export class SatService {
       };
     };
     await sleep(10);
+    logger('Começou a minerar html...');
     let { table, emitContent, satNumber, dateEmit, barCode, cnpj, ie } =
       await page.evaluate(dataMining);
 
@@ -66,20 +74,31 @@ export class SatService {
       ...treatmentsInnerHtml(cnpj),
       ...treatmentsInnerHtml(ie),
     ];
-    return {
+    const newLocal = {
       dateEmit: treatmentsInnerHtml(dateEmit)[0],
       satNumber: treatmentsInnerHtml(satNumber)[0],
       barCode: treatmentsInnerHtml(barCode)[0],
       emitContent: treatmentsEmitContent(listEmitContent),
       products: treatmentsTable(table),
     };
+    const dateProcess = new Date().toLocaleString('en', {
+      timeZone: 'America/Sao_Paulo',
+    });
+    const newObject = {
+      date_processed: dateProcess,
+      nota: newLocal,
+    };
+
+    logger(`Salvando no banco a nota ${code} as ${dateProcess}`);
+    await this.repository.update({ code }, newObject);
+    logger(`Salvo com sucesso a nota ${code}`);
   }
 
   async passarAcess(page, site_key, site_url, code) {
     let captcha_token = await resolve_captcha_v2(site_key, site_url);
     if (!captcha_token) return logger('Falha ao obter o TOKEN 😤');
     logger('Passou do captcha');
-    await page.type('[id="conteudo_txtChaveAcesso"]', code);
+    await page.type('[id="conteudo_txtChaveAcesso"]', ' ' + code);
     logger('Está digitando...');
     await page.evaluate(
       `document.getElementById("g-recaptcha-response").innerHTML="${captcha_token}";`,

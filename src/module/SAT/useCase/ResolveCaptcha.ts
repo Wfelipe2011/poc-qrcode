@@ -15,19 +15,13 @@ export async function resolve_captcha_v2(google_key: string, site_url: string) {
 
   while (1) {
     await sleep(10);
-    logger('verificando se o captcha está pronto...');
+    logger('verificando se o captcha esta pronto...');
     let captcha_ready = await curl({
       method: 'GET',
       url: `https://2captcha.com/res.php?key=${API_KEY}&action=get&id=${captcha_id}&json=true`,
     });
 
     let parsed_captcha_ready = JSON.parse(captcha_ready as any);
-
-    if (parsed_captcha_ready.status == 1) {
-      logger('o seu captcha esta pronto');
-    } else {
-      logger('ainda resolvendo captcha');
-    }
 
     if (parsed_captcha_ready.status == 1) return parsed_captcha_ready.request;
     else if (parsed_captcha_ready.request != 'CAPCHA_NOT_READY') return false;
