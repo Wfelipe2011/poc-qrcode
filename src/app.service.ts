@@ -11,6 +11,6 @@ export class AppService {
   }
 
   startJob() {
-    this.jobSchedule.execute('*/10 6-20 * * 1-5');
+    // this.jobSchedule.execute('*/10 6-20 * * 1-5');
   }
 }

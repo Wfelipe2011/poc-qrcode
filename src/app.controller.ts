@@ -40,7 +40,9 @@ export class AppController {
 
   @Get('job')
   async startJob() {
-    const data = await this.repository.find<NotesBody>({ status: false });
+    const data = await (
+      await this.repository.find<NotesBody>({ status: false })
+    ).slice(0, 5);
     if (!data.length) return;
     data.forEach((body) => {
       new SatService().execute(body);

@@ -4,12 +4,9 @@ import { logger } from 'skyot';
 import { User } from 'src/database/entity/UserEntity';
 import { Repository } from 'src/database/repository/Repository';
 import { NotesBody } from './../../app.controller';
-import { resolve_captcha_v2, sleep } from './useCase/ResolveCaptcha';
-import {
-  treatmentsEmitContent,
-  treatmentsInnerHtml,
-  treatmentsTable,
-} from './useCase/treatments';
+import { SELECTORS_HOME } from './entities/Selectors';
+import { resolve_captcha_v2 } from './useCase/ResolveCaptcha';
+import { treatmentsInnerHtml, treatmentsTable } from './useCase/treatments';
 export class SatService {
   repository: Repository;
   constructor() {
@@ -19,7 +16,7 @@ export class SatService {
   async execute(body: NotesBody) {
     const { code } = body;
     const browser = await puppeteer.launch({
-      headless: true,
+      headless: false,
       slowMo: 50,
     });
     const page = await browser.newPage();
@@ -29,27 +26,27 @@ export class SatService {
 
     await page.goto(site_url, { waitUntil: 'domcontentloaded' });
 
-    await this.passarAcess(page, site_key, site_url, code);
+    await this.passByHome(page, site_key, site_url, code);
 
     const dataMining = () => {
+      const getHtmlById = (id: string) => document.querySelector(id).innerHTML;
       const nodeListTable = document.querySelector('#tableItens')
         .childNodes as any;
 
-      const emitenteContent = document.querySelector('#DadosEmitenteContent')
-        .innerHTML as any;
+      const emitContent = {
+        nameFantasy: getHtmlById('#conteudo_lblNomeFantasiaEmitente'),
+        nameEmit: getHtmlById('#conteudo_lblNomeEmitente'),
+        address: getHtmlById('#conteudo_lblEnderecoEmintente'),
+        district: getHtmlById('#conteudo_lblBairroEmitente'),
+        zipCode: getHtmlById('#conteudo_lblCepEmitente'),
+        city: getHtmlById('#conteudo_lblMunicipioEmitente'),
+        cnpj: getHtmlById('#conteudo_lblCnpjEmitente'),
+        ie: getHtmlById('#conteudo_lblIeEmitente'),
+      };
 
-      const satNumber = document.querySelector('#conteudo_lblSatNumeroSerie')
-        .innerHTML as any;
-      const dateEmit = document.querySelector('#conteudo_lblDataEmissao')
-        .innerHTML as any;
-      const barCode = document.querySelector('#conteudo_lblIdCfe')
-        .innerHTML as any;
-
-      const cnpj = document.querySelector('#conteudo_lblCnpjEmitente')
-        .innerHTML as any;
-
-      const ie = document.querySelector('#conteudo_lblIeEmitente')
-        .innerHTML as any;
+      const satNumber = getHtmlById('#conteudo_lblSatNumeroSerie');
+      const dateEmit = getHtmlById('#conteudo_lblDataEmissao');
+      const barCode = getHtmlById('#conteudo_lblIdCfe');
 
       let table = {};
       for (let node of nodeListTable) {
@@ -57,30 +54,33 @@ export class SatService {
       }
       return {
         table,
-        emitContent: emitenteContent,
+        emitContent,
         satNumber,
         dateEmit,
         barCode,
-        cnpj,
-        ie,
       };
     };
-    await sleep(10);
+    // await sleep(10);
+    await page.waitForSelector('#tableItens');
     logger('Comecou a minerar html...');
     try {
-      let { table, emitContent, satNumber, dateEmit, barCode, cnpj, ie } =
+      let { table, emitContent, satNumber, dateEmit, barCode } =
         await page.evaluate(dataMining);
 
-      const listEmitContent = [
-        ...treatmentsInnerHtml(emitContent),
-        ...treatmentsInnerHtml(cnpj),
-        ...treatmentsInnerHtml(ie),
-      ];
       const newLocal = {
         dateEmit: treatmentsInnerHtml(dateEmit)[0],
         satNumber: treatmentsInnerHtml(satNumber)[0],
         barCode: treatmentsInnerHtml(barCode)[0],
-        emitContent: treatmentsEmitContent(listEmitContent),
+        emitContent: {
+          nameFantasy: treatmentsInnerHtml(emitContent.nameFantasy)[0],
+          nameEmit: treatmentsInnerHtml(emitContent.nameEmit)[0],
+          address: treatmentsInnerHtml(emitContent.address)[0],
+          district: treatmentsInnerHtml(emitContent.district)[0],
+          zipCode: treatmentsInnerHtml(emitContent.zipCode)[0],
+          city: treatmentsInnerHtml(emitContent.city)[0],
+          cnpj: treatmentsInnerHtml(emitContent.cnpj)[0],
+          ie: treatmentsInnerHtml(emitContent.ie)[0],
+        },
         products: treatmentsTable(table),
       };
       const dateProcess = new Date().toLocaleString('en', {
@@ -101,22 +101,27 @@ export class SatService {
     }
   }
 
-  async passarAcess(page, site_key, site_url, code) {
+  async passByHome(page, site_key, site_url, code) {
     let captcha_token = await resolve_captcha_v2(site_key, site_url, code);
     if (!captcha_token) return logger('Falha ao obter o TOKEN 😤');
     logger('Passou do captcha');
-    await page.type('[id="conteudo_txtChaveAcesso"]', ' ' + code);
+    await page.type(SELECTORS_HOME.inputCode, ' ' + code);
     logger('Está digitando...');
-    await page.evaluate(
-      `document.getElementById("g-recaptcha-response").innerHTML="${captcha_token}";`,
-    );
+    await page.evaluate(insertCaptchaCode, SELECTORS_HOME, captcha_token);
     logger('Fez o submit do formulario');
-    await page.evaluate(() => {
-      const input = document.querySelector('#conteudo_btnConsultar');
-      input.removeAttribute('disabled');
-      input.setAttribute('id', 'my-submit');
-    });
+    await page.evaluate(submitHome, SELECTORS_HOME);
     logger('Esta aguardando o resultado...');
     await page.click('[id="my-submit"]');
   }
+}
+
+function submitHome(SELECTORS_HOME) {
+  const input = document.querySelector(SELECTORS_HOME.inputSearch);
+  input.removeAttribute('disabled');
+  input.setAttribute('id', 'my-submit');
+}
+
+function insertCaptchaCode(SELECTORS_HOME, captcha_token) {
+  document.getElementById(SELECTORS_HOME.inputCaptcha).innerHTML =
+    captcha_token;
 }
