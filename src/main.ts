@@ -7,6 +7,7 @@ import { MongoDBConect } from './database/config/mongoConnect';
 export const API = 'http://localhost:3000';
 
 async function bootstrap() {
+  process.env.TZ = 'America/Sao_Paulo';
   await MongoDBConect.startMongo();
   const app = await NestFactory.create(AppModule);
   app.enableCors();
