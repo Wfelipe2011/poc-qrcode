@@ -13,15 +13,15 @@ const CodeEntity = {
     unique: true,
   },
   status: {
-    type: Boolean,
-  },
-  date_processed: {
-    type: Date,
-  },
-  date_created: {
     type: String,
   },
-  nota: {
+  dateProcessed: {
+    type: String,
+  },
+  dateCreated: {
+    type: String,
+  },
+  note: {
     type: Object,
   },
 };

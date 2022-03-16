@@ -1,3 +1,4 @@
+import { NotesBody } from 'src/app.controller';
 import { treatmentsInnerHtml, treatmentsTable } from './treatments';
 
 function newNotesEntities(htmlMining: {
@@ -8,7 +9,7 @@ function newNotesEntities(htmlMining: {
   barCode: any;
 }) {
   const { table, emitContent, satNumber, dateEmit, barCode } = htmlMining;
-  const newLocal = {
+  const newNotes = {
     dateEmit: treatmentsInnerHtml(dateEmit)[0],
     satNumber: treatmentsInnerHtml(satNumber)[0],
     barCode: treatmentsInnerHtml(barCode)[0],
@@ -24,15 +25,15 @@ function newNotesEntities(htmlMining: {
     },
     products: treatmentsTable(table),
   };
-  const dateProcess = new Date().toLocaleString('en', {
+  const dateProcessed = new Date().toLocaleString('en', {
     timeZone: 'America/Sao_Paulo',
   });
-  const newObject = {
-    date_processed: dateProcess,
-    nota: newLocal,
-    status: true,
+  const newEntity: NotesBody = {
+    dateProcessed,
+    note: newNotes,
+    status: 'success',
   };
-  return newObject;
+  return newEntity;
 }
 
 function submitHome(SELECTORS_HOME: { inputSearch: any }) {

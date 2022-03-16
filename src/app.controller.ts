@@ -8,12 +8,12 @@ import { sliceList } from './utils/sliceList';
 
 export interface NotesBody {
   _id?: string;
-  code: string;
-  email: string;
-  date_processed?: Date;
-  date_created?: string;
-  status?: boolean;
-  nota?: any;
+  code?: string;
+  email?: string;
+  dateProcessed?: string;
+  dateCreated?: string;
+  status?: 'success' | 'process' | 'pending' | 'invalid';
+  note?: any;
 }
 
 @Controller()
@@ -23,17 +23,24 @@ export class AppController {
     this.repository = new Repository(User);
   }
 
-  @Get('job')
+  @Get('notes')
   @SkyotLogger()
-  async startJob() {
-    this.executeJob();
+  async startNotes() {
+    this.executeJob('process');
     return `Job está processando notas`;
   }
 
-  async executeJob() {
-    let notes = [];
+  @Get('notes-pending')
+  @SkyotLogger()
+  async startNotesPending() {
+    this.executeJob('pending');
+    return `Job está processando as notas pending`;
+  }
+
+  async executeJob(status: string) {
+    let notes = [] as NotesBody[];
     try {
-      notes = await this.repository.find<NotesBody>({ status: false });
+      notes = await this.repository.find<NotesBody>({ status });
     } catch (error) {
       console.log('Acesso banco ', error);
       throw new BadRequestException(error);
@@ -41,7 +48,7 @@ export class AppController {
 
     if (!notes.length) return;
 
-    const notesSlice = sliceList(notes, 3);
+    const notesSlice = sliceList(notes, 5);
     let notesPromise = [];
     for (let [index, noteSlice] of notesSlice.entries()) {
       logger(

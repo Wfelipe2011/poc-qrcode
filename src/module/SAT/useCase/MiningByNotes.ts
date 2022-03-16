@@ -1,5 +1,6 @@
-import { BadRequestException, HttpException } from '@nestjs/common';
+import { BadRequestException } from '@nestjs/common';
 import { logger } from 'skyot';
+import { NotesBody } from 'src/app.controller';
 import { SELECTORS_NOTES } from '../entities/Selectors';
 import { SatService } from '../sat.service';
 import { dataMining, newNotesEntities } from './evaluteFunctions';
@@ -7,18 +8,17 @@ import { dataMining, newNotesEntities } from './evaluteFunctions';
 export class MiningByNotes {
   static async execute(context: SatService) {
     try {
-      await context.page.waitForSelector('#tableItens');
+      await context.page.waitForSelector(SELECTORS_NOTES.tableItems);
     } catch (error) {
-      logger('nota não encontrada');
-      // invalidar nota
-      throw new HttpException('Error timeout', 408);
+      await MiningByNotes.verifyNote(context);
+      return;
     }
     logger('Comecou a minerar html...');
     try {
       let htmlMining = await context.page.evaluate(dataMining, SELECTORS_NOTES);
       const entityNotes = newNotesEntities(htmlMining);
       logger(
-        `Salvando no banco a nota ${context.code} as ${entityNotes.date_processed}`,
+        `Salvando no banco a nota ${context.code} as ${entityNotes.dateProcessed}`,
       );
       await context.repository.update({ code: context.code }, entityNotes);
       logger(`Salvo com sucesso a nota ${context.code}`);
@@ -27,5 +27,25 @@ export class MiningByNotes {
       logger('Erro ao minerar html');
       throw new BadRequestException(error);
     }
+  }
+
+  private static async verifyNote(context: SatService) {
+    logger('nota não encontrada');
+    // invalidar nota
+    const note = await context.repository.findOne<NotesBody>({
+      code: context.code,
+    });
+    const dateProcessed = new Date().toLocaleString('en', {
+      timeZone: 'America/Sao_Paulo',
+    });
+    const entityNotes: NotesBody = {
+      dateProcessed,
+      status: note.status === 'pending' ? 'invalid' : 'pending',
+    };
+    await context.repository.update({ code: context.code }, entityNotes);
+    logger(
+      `Nota: ${context.code} status: ${note.status} date: ${dateProcessed}`,
+    );
+    context.browser.close();
   }
 }
