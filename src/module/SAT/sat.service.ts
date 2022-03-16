@@ -31,6 +31,7 @@ export class SatService {
     const browser = await puppeteer.launch({
       headless: true,
       slowMo: 50,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
     });
     const page = await browser.newPage();
     return new SatService(code, page, browser);
