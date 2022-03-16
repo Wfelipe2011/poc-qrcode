@@ -45,7 +45,7 @@ export class AppController {
     ).slice(0, 5);
     if (!data.length) return;
     data.forEach((body) => {
-      new SatService().execute(body);
+      SatService.execute(body);
     });
     logger(`Job esta processando ${data.length} notas`);
     return `Job está processando ${data.length} notas`;
