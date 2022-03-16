@@ -1,5 +1,5 @@
 import { BadRequestException, Controller, Get } from '@nestjs/common';
-import { logger, SkyotLogger } from 'skyot';
+import { logger } from 'skyot';
 import { AppService } from './app.service';
 import { User } from './database/entity/UserEntity';
 import { Repository } from './database/repository/Repository';
@@ -24,14 +24,12 @@ export class AppController {
   }
 
   @Get('notes')
-  @SkyotLogger()
   async startNotes() {
     this.executeJob('process');
     return `Job está processando notas`;
   }
 
   @Get('notes-pending')
-  @SkyotLogger()
   async startNotesPending() {
     this.executeJob('pending');
     return `Job está processando as notas pending`;
