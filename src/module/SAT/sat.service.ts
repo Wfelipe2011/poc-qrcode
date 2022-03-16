@@ -30,8 +30,13 @@ export class SatService {
   private static async factorySatService(code: string) {
     const browser = await puppeteer.launch({
       headless: true,
+      ignoreHTTPSErrors: true,
       slowMo: 50,
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--enable-features=NetworkService ',
+      ],
     });
     const page = await browser.newPage();
     return new SatService(code, page, browser);

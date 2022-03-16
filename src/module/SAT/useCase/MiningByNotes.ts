@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, HttpException } from '@nestjs/common';
 import { logger } from 'skyot';
 import { SELECTORS_NOTES } from '../entities/Selectors';
 import { SatService } from '../sat.service';
@@ -6,7 +6,13 @@ import { dataMining, newNotesEntities } from './evaluteFunctions';
 
 export class MiningByNotes {
   static async execute(context: SatService) {
-    await context.page.waitForSelector('#tableItens');
+    try {
+      await context.page.waitForSelector('#tableItens');
+    } catch (error) {
+      logger('nota não encontrada');
+      // invalidar nota
+      throw new HttpException('Error timeout', 408);
+    }
     logger('Comecou a minerar html...');
     try {
       let htmlMining = await context.page.evaluate(dataMining, SELECTORS_NOTES);

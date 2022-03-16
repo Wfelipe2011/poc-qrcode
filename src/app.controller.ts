@@ -1,5 +1,5 @@
-import { Controller, Get } from '@nestjs/common';
-import { logger } from 'skyot';
+import { BadRequestException, Controller, Get } from '@nestjs/common';
+import { logger, SkyotLogger } from 'skyot';
 import { AppService } from './app.service';
 import { User } from './database/entity/UserEntity';
 import { Repository } from './database/repository/Repository';
@@ -24,8 +24,15 @@ export class AppController {
   }
 
   @Get('job')
+  @SkyotLogger()
   async startJob() {
-    const notes = await this.repository.find<NotesBody>({ status: false });
+    let notes = [];
+    try {
+      notes = await this.repository.find<NotesBody>({ status: false });
+    } catch (error) {
+      console.log('Acesso banco ', error);
+      throw new BadRequestException(error);
+    }
 
     if (!notes.length) return;
 
@@ -37,9 +44,16 @@ export class AppController {
           notesSlice.length
         } notas`,
       );
-      noteSlice.forEach((body) => notesPromise.push(SatService.execute(body)));
-      await Promise.all(notesPromise);
-      notesPromise = [];
+      try {
+        noteSlice.forEach((body) =>
+          notesPromise.push(SatService.execute(body)),
+        );
+        await Promise.all(notesPromise);
+        notesPromise = [];
+      } catch (error) {
+        console.log('Execução loop => ', error);
+        throw new BadRequestException(error);
+      }
     }
 
     logger(`Total de notas ${notes.length} notas`);
