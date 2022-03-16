@@ -26,6 +26,11 @@ export class AppController {
   @Get('job')
   @SkyotLogger()
   async startJob() {
+    this.executeJob();
+    return `Job está processando notas`;
+  }
+
+  async executeJob() {
     let notes = [];
     try {
       notes = await this.repository.find<NotesBody>({ status: false });
@@ -57,6 +62,5 @@ export class AppController {
     }
 
     logger(`Total de notas ${notes.length} notas`);
-    return `Job está processando ${notes.length} notas`;
   }
 }
