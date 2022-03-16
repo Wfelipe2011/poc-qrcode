@@ -4,7 +4,11 @@ import { logger } from 'skyot';
 import { User } from 'src/database/entity/UserEntity';
 import { Repository } from 'src/database/repository/Repository';
 import { NotesBody } from './../../app.controller';
-import { SELECTORS_HOME } from './entities/Selectors';
+import {
+  SELECTORS_CONFIG,
+  SELECTORS_HOME,
+  SELECTORS_NOTES,
+} from './entities/Selectors';
 import { resolve_captcha_v2 } from './useCase/ResolveCaptcha';
 import { treatmentsInnerHtml, treatmentsTable } from './useCase/treatments';
 export class SatService {
@@ -16,85 +20,31 @@ export class SatService {
   async execute(body: NotesBody) {
     const { code } = body;
     const browser = await puppeteer.launch({
-      headless: false,
+      headless: true,
       slowMo: 50,
     });
     const page = await browser.newPage();
-    let site_key = '6LeEy8wUAAAAAHN6Wu2rNdku25fyHUVgovX-rJqM';
-    let site_url =
-      'https://satsp.fazenda.sp.gov.br/COMSAT/Public/ConsultaPublica/ConsultaPublicaCfe.aspx';
-
-    await page.goto(site_url, { waitUntil: 'domcontentloaded' });
-
-    await this.passByHome(page, site_key, site_url, code);
-
-    const dataMining = () => {
-      const getHtmlById = (id: string) => document.querySelector(id).innerHTML;
-      const nodeListTable = document.querySelector('#tableItens')
-        .childNodes as any;
-
-      const emitContent = {
-        nameFantasy: getHtmlById('#conteudo_lblNomeFantasiaEmitente'),
-        nameEmit: getHtmlById('#conteudo_lblNomeEmitente'),
-        address: getHtmlById('#conteudo_lblEnderecoEmintente'),
-        district: getHtmlById('#conteudo_lblBairroEmitente'),
-        zipCode: getHtmlById('#conteudo_lblCepEmitente'),
-        city: getHtmlById('#conteudo_lblMunicipioEmitente'),
-        cnpj: getHtmlById('#conteudo_lblCnpjEmitente'),
-        ie: getHtmlById('#conteudo_lblIeEmitente'),
-      };
-
-      const satNumber = getHtmlById('#conteudo_lblSatNumeroSerie');
-      const dateEmit = getHtmlById('#conteudo_lblDataEmissao');
-      const barCode = getHtmlById('#conteudo_lblIdCfe');
-
-      let table = {};
-      for (let node of nodeListTable) {
-        table[node.nodeName] = node.innerText;
-      }
-      return {
-        table,
-        emitContent,
-        satNumber,
-        dateEmit,
-        barCode,
-      };
-    };
+    await page.goto(SELECTORS_CONFIG.site_url, {
+      waitUntil: 'domcontentloaded',
+    });
+    await this.passByHome(
+      page,
+      SELECTORS_CONFIG.site_key,
+      SELECTORS_CONFIG.site_url,
+      code,
+    );
     // await sleep(10);
     await page.waitForSelector('#tableItens');
     logger('Comecou a minerar html...');
     try {
-      let { table, emitContent, satNumber, dateEmit, barCode } =
-        await page.evaluate(dataMining);
-
-      const newLocal = {
-        dateEmit: treatmentsInnerHtml(dateEmit)[0],
-        satNumber: treatmentsInnerHtml(satNumber)[0],
-        barCode: treatmentsInnerHtml(barCode)[0],
-        emitContent: {
-          nameFantasy: treatmentsInnerHtml(emitContent.nameFantasy)[0],
-          nameEmit: treatmentsInnerHtml(emitContent.nameEmit)[0],
-          address: treatmentsInnerHtml(emitContent.address)[0],
-          district: treatmentsInnerHtml(emitContent.district)[0],
-          zipCode: treatmentsInnerHtml(emitContent.zipCode)[0],
-          city: treatmentsInnerHtml(emitContent.city)[0],
-          cnpj: treatmentsInnerHtml(emitContent.cnpj)[0],
-          ie: treatmentsInnerHtml(emitContent.ie)[0],
-        },
-        products: treatmentsTable(table),
-      };
-      const dateProcess = new Date().toLocaleString('en', {
-        timeZone: 'America/Sao_Paulo',
-      });
-      const newObject = {
-        date_processed: dateProcess,
-        nota: newLocal,
-        status: true,
-      };
-
-      logger(`Salvando no banco a nota ${code} as ${dateProcess}`);
-      await this.repository.update({ code }, newObject);
+      let htmlMining = await page.evaluate(dataMining, SELECTORS_NOTES);
+      const entityNotes = newNotesEntities(htmlMining);
+      logger(
+        `Salvando no banco a nota ${code} as ${entityNotes.date_processed}`,
+      );
+      await this.repository.update({ code }, entityNotes);
       logger(`Salvo com sucesso a nota ${code}`);
+      browser.close();
     } catch (error) {
       logger('Erro ao minerar html');
       throw new BadRequestException(error);
@@ -115,6 +65,35 @@ export class SatService {
   }
 }
 
+function newNotesEntities(htmlMining) {
+  const { table, emitContent, satNumber, dateEmit, barCode } = htmlMining;
+  const newLocal = {
+    dateEmit: treatmentsInnerHtml(dateEmit)[0],
+    satNumber: treatmentsInnerHtml(satNumber)[0],
+    barCode: treatmentsInnerHtml(barCode)[0],
+    emitContent: {
+      nameFantasy: treatmentsInnerHtml(emitContent.nameFantasy)[0],
+      nameEmit: treatmentsInnerHtml(emitContent.nameEmit)[0],
+      address: treatmentsInnerHtml(emitContent.address)[0],
+      district: treatmentsInnerHtml(emitContent.district)[0],
+      zipCode: treatmentsInnerHtml(emitContent.zipCode)[0],
+      city: treatmentsInnerHtml(emitContent.city)[0],
+      cape: treatmentsInnerHtml(emitContent.cnpj)[0],
+      ie: treatmentsInnerHtml(emitContent.ie)[0],
+    },
+    products: treatmentsTable(table),
+  };
+  const dateProcess = new Date().toLocaleString('en', {
+    timeZone: 'America/Sao_Paulo',
+  });
+  const newObject = {
+    date_processed: dateProcess,
+    nota: newLocal,
+    status: true,
+  };
+  return newObject;
+}
+
 function submitHome(SELECTORS_HOME) {
   const input = document.querySelector(SELECTORS_HOME.inputSearch);
   input.removeAttribute('disabled');
@@ -124,4 +103,37 @@ function submitHome(SELECTORS_HOME) {
 function insertCaptchaCode(SELECTORS_HOME, captcha_token) {
   document.getElementById(SELECTORS_HOME.inputCaptcha).innerHTML =
     captcha_token;
+}
+
+function dataMining(SELECTORS_NOTES) {
+  const getHtmlById = (id: string) => document.querySelector(id).innerHTML;
+  const nodeListTable = document.querySelector(SELECTORS_NOTES.tableItems)
+    .childNodes as any;
+
+  const emitContent = {
+    nameFantasy: getHtmlById(SELECTORS_NOTES.nameFantasy),
+    nameEmit: getHtmlById(SELECTORS_NOTES.nameEmit),
+    address: getHtmlById(SELECTORS_NOTES.address),
+    district: getHtmlById(SELECTORS_NOTES.district),
+    zipCode: getHtmlById(SELECTORS_NOTES.zipCode),
+    city: getHtmlById(SELECTORS_NOTES.city),
+    cnpj: getHtmlById(SELECTORS_NOTES.cnpj),
+    ie: getHtmlById(SELECTORS_NOTES.ie),
+  };
+
+  const satNumber = getHtmlById(SELECTORS_NOTES.satNumber);
+  const dateEmit = getHtmlById(SELECTORS_NOTES.dateEmit);
+  const barCode = getHtmlById(SELECTORS_NOTES.barCode);
+
+  let table = {};
+  for (let node of nodeListTable) {
+    table[node.nodeName] = node.innerText;
+  }
+  return {
+    table,
+    emitContent,
+    satNumber,
+    dateEmit,
+    barCode,
+  };
 }

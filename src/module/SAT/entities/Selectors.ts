@@ -1,5 +1,5 @@
 export enum SELECTORS_NOTES {
-  tableItens = '#tableItens',
+  tableItems = '#tableItens',
   nameFantasy = '#conteudo_lblNomeFantasiaEmitente',
   nameEmit = '#conteudo_lblNomeEmitente',
   address = '#conteudo_lblEnderecoEmintente',
@@ -17,4 +17,9 @@ export enum SELECTORS_HOME {
   inputCode = '[id="conteudo_txtChaveAcesso"]',
   inputCaptcha = 'g-recaptcha-response',
   inputSearch = '#conteudo_btnConsultar',
+}
+
+export enum SELECTORS_CONFIG {
+  site_key = '6LeEy8wUAAAAAHN6Wu2rNdku25fyHUVgovX-rJqM',
+  site_url = 'https://satsp.fazenda.sp.gov.br/COMSAT/Public/ConsultaPublica/ConsultaPublicaCfe.aspx',
 }
