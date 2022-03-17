@@ -4,13 +4,14 @@ import { AppService } from './app.service';
 import { User } from './database/entity/UserEntity';
 import { Repository } from './database/repository/Repository';
 import { SatService } from './module/SAT/sat.service';
+import { diffDays } from './utils/diffTime';
 import { sliceList } from './utils/sliceList';
 
 export interface NotesBody {
   _id?: string;
   code?: string;
   email?: string;
-  dateProcessed?: string;
+  dateProcessed?: Date;
   dateCreated?: string;
   status?: 'success' | 'process' | 'pending' | 'invalid';
   note?: any;
@@ -39,6 +40,7 @@ export class AppController {
     let notes = [] as NotesBody[];
     try {
       notes = await this.repository.find<NotesBody>({ status });
+      notes = this.validPendingNotes(status, notes);
     } catch (error) {
       console.log('Acesso banco ', error);
       throw new BadRequestException(error);
@@ -67,5 +69,19 @@ export class AppController {
     }
 
     logger(`Total de notas ${notes.length} notas`);
+  }
+
+  private validPendingNotes(status: string, notes: NotesBody[]) {
+    if (status === 'pending') {
+      const notesFilter = notes.filter((note) =>
+        this.spentTwoDays(note.dateProcessed, new Date()),
+      );
+      return notesFilter;
+    }
+    return notes;
+  }
+
+  private spentTwoDays(dateFrom, dateTo) {
+    return Boolean(diffDays(dateFrom, dateTo) >= 2);
   }
 }

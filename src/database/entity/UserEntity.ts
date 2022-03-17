@@ -16,7 +16,7 @@ const CodeEntity = {
     type: String,
   },
   dateProcessed: {
-    type: String,
+    type: Date,
   },
   dateCreated: {
     type: String,

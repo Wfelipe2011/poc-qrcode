@@ -35,9 +35,7 @@ export class MiningByNotes {
     const note = await context.repository.findOne<NotesBody>({
       code: context.code,
     });
-    const dateProcessed = new Date().toLocaleString('en', {
-      timeZone: 'America/Sao_Paulo',
-    });
+    const dateProcessed = new Date();
     const entityNotes: NotesBody = {
       dateProcessed,
       status: note.status === 'pending' ? 'invalid' : 'pending',

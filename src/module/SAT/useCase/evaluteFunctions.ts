@@ -25,9 +25,7 @@ function newNotesEntities(htmlMining: {
     },
     products: treatmentsTable(table),
   };
-  const dateProcessed = new Date().toLocaleString('en', {
-    timeZone: 'America/Sao_Paulo',
-  });
+  const dateProcessed = new Date();
   const newEntity: NotesBody = {
     dateProcessed,
     note: newNotes,
