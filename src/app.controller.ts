@@ -35,6 +35,11 @@ export class AppController {
     this.executeJob('pending');
     return `Job está processando as notas pending`;
   }
+  // pegar notas com status process
+
+  // passar status para jobwork e salvar banco
+
+  // processar as notas
 
   async executeJob(status: string) {
     let notes = [] as NotesBody[];
@@ -46,9 +51,14 @@ export class AppController {
       throw new BadRequestException(error);
     }
 
-    if (!notes.length) return;
+    if (!notes.length) {
+      logger('Nao tem notas para ser processadas');
+      return;
+    }
 
-    const notesSlice = sliceList(notes, 5);
+    this.notifyExecution(notes);
+
+    const notesSlice = sliceList(notes, 3);
     let notesPromise = [];
     for (let [index, noteSlice] of notesSlice.entries()) {
       logger(
@@ -69,6 +79,17 @@ export class AppController {
     }
 
     logger(`Total de notas ${notes.length} notas`);
+  }
+
+  private notifyExecution(notes: NotesBody[]) {
+    notes.forEach(async (note) => {
+      const dateProcessed = new Date();
+      const entityNotes: NotesBody = {
+        dateProcessed,
+        status: 'process',
+      };
+      await this.repository.update({ code: note.code }, entityNotes);
+    });
   }
 
   private validPendingNotes(status: string, notes: NotesBody[]) {

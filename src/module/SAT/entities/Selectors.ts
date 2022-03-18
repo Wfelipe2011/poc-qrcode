@@ -11,6 +11,8 @@ export enum SELECTORS_NOTES {
   satNumber = '#conteudo_lblSatNumeroSerie',
   dateEmit = '#conteudo_lblDataEmissao',
   barCode = '#conteudo_lblIdCfe',
+  total = '#conteudo_lblTotal',
+  tributes = '#conteudo_lblTotal12741',
 }
 
 export enum SELECTORS_HOME {

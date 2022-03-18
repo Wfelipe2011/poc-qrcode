@@ -61,6 +61,8 @@ function dataMining(SELECTORS_NOTES: {
   satNumber: string;
   dateEmit: string;
   barCode: string;
+  total: string;
+  tributes: string;
 }) {
   const getHtmlById = (id: string) => document.querySelector(id).innerHTML;
   const nodeListTable = document.querySelector(SELECTORS_NOTES.tableItems)
@@ -75,6 +77,8 @@ function dataMining(SELECTORS_NOTES: {
     city: getHtmlById(SELECTORS_NOTES.city),
     cnpj: getHtmlById(SELECTORS_NOTES.cnpj),
     ie: getHtmlById(SELECTORS_NOTES.ie),
+    total: getHtmlById(SELECTORS_NOTES.total),
+    tributes: getHtmlById(SELECTORS_NOTES.ie),
   };
 
   const satNumber = getHtmlById(SELECTORS_NOTES.satNumber);
