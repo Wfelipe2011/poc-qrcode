@@ -26,7 +26,7 @@ export class AppController {
 
   @Get('notes')
   async startNotes() {
-    this.executeJob('process');
+    this.executeJob('analyse');
     return `Job está processando notas`;
   }
 
