@@ -1,11 +1,9 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { logger } from 'skyot';
+import { Injectable } from '@nestjs/common';
 import { NotesBody } from './app.controller';
 import { User } from './database/entity/UserEntity';
 import { Repository } from './database/repository/Repository';
-import { SatService } from './module/SAT/sat.service';
+import { NFCService } from './module/NFC/nfc.service';
 import { diffDays } from './utils/diffTime';
-import { sliceList } from './utils/sliceList';
 
 @Injectable()
 export class AppService {
@@ -15,43 +13,51 @@ export class AppService {
   }
 
   async executeJob(status: string) {
-    let notes = [] as NotesBody[];
-    try {
-      notes = await this.repository.find<NotesBody>({ status });
-      notes = this.validPendingNotes(status, notes);
-    } catch (error) {
-      console.log('Acesso banco ', error);
-      throw new BadRequestException(error);
-    }
+    NFCService.execute({});
 
-    if (!notes.length) {
-      logger('Nao tem notas para ser processadas');
-      return;
-    }
+    // let notes = [] as NotesBody[];
+    // try {
+    //   notes = await this.repository.find<NotesBody>({ status });
+    //   notes = this.validPendingNotes(status, notes);
+    // } catch (error) {
+    //   console.log('Acesso banco ', error);
+    //   throw new BadRequestException(error);
+    // }
 
-    this.notifyExecution(notes);
+    // if (!notes.length) {
+    //   logger('Nao tem notas para ser processadas');
+    //   return;
+    // }
 
-    const notesSlice = sliceList(notes, 3);
-    let notesPromise = [];
-    for (let [index, noteSlice] of notesSlice.entries()) {
-      logger(
-        `Job esta processando o lote ${index + 1} de ${
-          notesSlice.length
-        } notas`,
-      );
-      try {
-        noteSlice.forEach((body) =>
-          notesPromise.push(SatService.execute(body)),
-        );
-        await Promise.all(notesPromise);
-        notesPromise = [];
-      } catch (error) {
-        console.log('Execução loop => ', error);
-        throw new BadRequestException(error);
-      }
-    }
+    // this.notifyExecution(notes);
 
-    logger(`Total de notas ${notes.length} notas`);
+    // const notesSlice = sliceList(notes, 3);
+    // let notesPromise = [];
+    // for (let [index, noteSlice] of notesSlice.entries()) {
+    //   logger(
+    //     `Job esta processando o lote ${index + 1} de ${
+    //       notesSlice.length
+    //     } notas`,
+    //   );
+    //   try {
+    //     for (let body of notes) {
+    //       // if (this.isSatNote(body.code)) {
+    //       //   notesPromise.push(SatService.execute(body));
+    //       // }
+    //       if (this.isNFCNote('35220362545579001105650100002830451107855273')) {
+    //         notesPromise.push(NFCService.execute(body));
+    //       }
+    //     }
+
+    //     await Promise.all(notesPromise);
+    //     notesPromise = [];
+    //   } catch (error) {
+    //     console.log('Execução loop => ', error);
+    //     throw new BadRequestException(error);
+    //   }
+    // }
+
+    // logger(`Total de notas ${notes.length} notas`);
   }
 
   private notifyExecution(notes: NotesBody[]) {
@@ -73,6 +79,18 @@ export class AppService {
       return notesFilter;
     }
     return notes;
+  }
+
+  isSatNote(code) {
+    return Boolean(this.typeNote(code) == '59');
+  }
+
+  isNFCNote(code) {
+    return Boolean(this.typeNote(code) == '65');
+  }
+
+  private typeNote(code: string) {
+    return `${code[20]}${code[21]}`;
   }
 
   private spentTwoDays(dateFrom, dateTo) {

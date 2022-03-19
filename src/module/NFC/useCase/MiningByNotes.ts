@@ -1,25 +1,47 @@
 import { BadRequestException } from '@nestjs/common';
 import { logger } from 'skyot';
 import { NotesBody } from 'src/app.controller';
-import { SAT_SELECTORS_NOTES } from '../entities/SAT.Selectors';
-import { SatService } from '../sat.service';
-import { dataMining, newNotesEntities } from './evaluteFunctions';
+import { NFC_SELECTORS_NOTES } from '../entities/Selectors';
+import { NFCService } from '../nfc.service';
+import {
+  miningProduct,
+  treatmentsTableEmitent,
+  treatmentsTableInfo,
+  treatmentsTableProducts,
+} from './evaluteFunctions';
 
 export class MiningByNotes {
-  static async execute(context: SatService) {
+  static async execute(context: NFCService) {
     try {
-      await context.page.waitForSelector(SAT_SELECTORS_NOTES.tableItems);
+      await context.page.waitForSelector(NFC_SELECTORS_NOTES.tableItems);
     } catch (error) {
       await MiningByNotes.verifyNote(context);
       return;
     }
     logger('Comecou a minerar html...');
     try {
-      let htmlMining = await context.page.evaluate(
-        dataMining,
-        SAT_SELECTORS_NOTES,
+      let { table: htmlProduct, text } = await context.page.evaluate(
+        miningProduct,
+        NFC_SELECTORS_NOTES,
       );
-      const entityNotes = newNotesEntities(htmlMining);
+
+      logger('Comecou a minerar html...');
+      let htmlEmitent = await context.page.evaluate(
+        (NFC_SELECTORS_NOTES) =>
+          document.querySelector(NFC_SELECTORS_NOTES.tableEmitent).innerText,
+        NFC_SELECTORS_NOTES,
+      );
+
+      const entityNotes = {
+        dateProcessed: new Date(),
+        status: 'success',
+        ...treatmentsTableInfo(text),
+        barCode: context.code,
+        emitContent: treatmentsTableEmitent(htmlEmitent),
+        products: treatmentsTableProducts(htmlProduct),
+      };
+
+      console.log(entityNotes);
       logger(
         `Salvando no banco a nota ${context.code} as ${entityNotes.dateProcessed}`,
       );
@@ -32,9 +54,8 @@ export class MiningByNotes {
     }
   }
 
-  private static async verifyNote(context: SatService) {
+  private static async verifyNote(context: NFCService) {
     logger('nota não encontrada');
-    // invalidar nota
     const note = await context.repository.findOne<NotesBody>({
       code: context.code,
     });

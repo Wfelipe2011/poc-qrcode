@@ -1,4 +1,4 @@
-export enum SELECTORS_NOTES {
+export enum SAT_SELECTORS_NOTES {
   tableItems = '#tableItens',
   nameFantasy = '#conteudo_lblNomeFantasiaEmitente',
   nameEmit = '#conteudo_lblNomeEmitente',
@@ -15,13 +15,13 @@ export enum SELECTORS_NOTES {
   tributes = '#conteudo_lblTotal12741',
 }
 
-export enum SELECTORS_HOME {
+export enum SAT_SELECTORS_HOME {
   inputCode = '[id="conteudo_txtChaveAcesso"]',
   inputCaptcha = 'g-recaptcha-response',
   inputSearch = '#conteudo_btnConsultar',
 }
 
-export enum SELECTORS_CONFIG {
+export enum SAT_SELECTORS_CONFIG {
   site_key = '6LeEy8wUAAAAAHN6Wu2rNdku25fyHUVgovX-rJqM',
   site_url = 'https://satsp.fazenda.sp.gov.br/COMSAT/Public/ConsultaPublica/ConsultaPublicaCfe.aspx',
 }
