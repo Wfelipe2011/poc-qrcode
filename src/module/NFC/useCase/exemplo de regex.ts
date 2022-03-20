@@ -93,13 +93,32 @@ const html = `
 `;
 //https://pt.stackoverflow.com/questions/180826/como-pegar-uma-string-que-est%C3%A1-entre-tags-com-javascript-utilizando-regex
 
-var regex = /<label>CEP<\/label>\n.+?<span>(.*)<\/span>/;
-const result = regex.exec(html)[1];
-console.log(result);
+export function treatmentsTableEmitent(html) {
+  const getRegexValue = (regex: RegExp) => regex.exec(html)[1];
 
-let cep = '';
-html.replace(
-  /<label>CEP<\/label>\n.+?<span>(.*)<\/span>/gm,
-  (match, value1) => (cep = value1),
-);
-console.log(cep);
+  const NAME_FANTASY = /<label>Nome Fantasia<\/label>\n.+?<span>(.*)<\/span>/;
+  const NAME_EMIT =
+    /<label>Nome \/ Razão Social<\/label>\n.+?<span>(.*)<\/span>/;
+  const ADRESS = /<label>Endereço<\/label>\n.+?<span>(.*\n.*\n.*)?<\/span>/;
+  const DISTRICT = /<label>Bairro \/ Distrito<\/label>\n.+?<span>(.*)<\/span>/;
+  const ZIP_CODE = /<label>CEP<\/label>\n.+?<span>(.*)<\/span>/;
+  const CITY = /<label>Município<\/label>\n.+?<span>(.*\n.*\n.*)?<\/span>/;
+  const CNPJ = /<label>CNPJ<\/label>\n.+?<span>(.*)<\/span>/;
+  const IE = /<label>Inscrição Municipal<\/label>\n.+?<span>(.*)<\/span>/;
+
+  const emitContent = {
+    nameFantasy: getRegexValue(NAME_FANTASY),
+    nameEmit: getRegexValue(NAME_EMIT),
+    address: getRegexValue(ADRESS).replace(/\n+|&nbsp|;|(  )/g, ''),
+    district: getRegexValue(DISTRICT),
+    zipCode: getRegexValue(ZIP_CODE),
+    city: getRegexValue(CITY)
+      .replace(/\n+|&nbsp|;|(  )/g, '')
+      .trim(),
+    cnpj: getRegexValue(CNPJ),
+    ie: getRegexValue(IE),
+  };
+  return emitContent;
+}
+
+console.log(treatmentsTableEmitent(html));

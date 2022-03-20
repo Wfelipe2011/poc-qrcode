@@ -25,10 +25,15 @@ export class MiningByNotes {
         NFC_SELECTORS_NOTES,
       );
 
+      //navegação
+      logger('navegou para pagina de abas');
+      await context.page.click(NFC_SELECTORS_NOTES.abas);
+      logger('esperando carregar html...');
+      await context.page.waitForSelector(NFC_SELECTORS_NOTES.tableEmitent);
       logger('Comecou a minerar html...');
       let htmlEmitent = await context.page.evaluate(
         (NFC_SELECTORS_NOTES) =>
-          document.querySelector(NFC_SELECTORS_NOTES.tableEmitent).innerText,
+          document.querySelector(NFC_SELECTORS_NOTES.tableEmitent).innerHTML,
         NFC_SELECTORS_NOTES,
       );
 

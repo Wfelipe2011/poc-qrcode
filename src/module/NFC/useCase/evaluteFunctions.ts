@@ -51,19 +51,30 @@ export function miningProduct(NFC_SELECTORS_NOTES) {
   return { table, text };
 }
 
-export function treatmentsTableEmitent(text) {
-  const listSplit = text.split(/\n/);
-  console.log(listSplit);
+export function treatmentsTableEmitent(html) {
+  const getRegexValue = (regex: RegExp) => regex.exec(html)[1];
+
+  const NAME_FANTASY = /<label>Nome Fantasia<\/label>\n.+?<span>(.*)<\/span>/;
+  const NAME_EMIT =
+    /<label>Nome \/ Razão Social<\/label>\n.+?<span>(.*)<\/span>/;
+  const ADRESS = /<label>Endereço<\/label>\n.+?<span>(.*\n.*\n.*)?<\/span>/;
+  const DISTRICT = /<label>Bairro \/ Distrito<\/label>\n.+?<span>(.*)<\/span>/;
+  const ZIP_CODE = /<label>CEP<\/label>\n.+?<span>(.*)<\/span>/;
+  const CITY = /<label>Município<\/label>\n.+?<span>(.*\n.*\n.*)?<\/span>/;
+  const CNPJ = /<label>CNPJ<\/label>\n.+?<span>(.*)<\/span>/;
+  const IE = /<label>Inscrição Municipal<\/label>\n.+?<span>(.*)<\/span>/;
 
   const emitContent = {
-    nameFantasy: null,
-    nameEmit: text[1]?.trim(),
-    address: listSplit.slice(5, 8).toString().replace(/\t/g, '')?.trim(),
-    district: listSplit[11]?.trim(),
-    zipCode: null,
-    city: listSplit[13]?.trim(),
-    cnpj: listSplit[4]?.trim(),
-    ie: null,
+    nameFantasy: getRegexValue(NAME_FANTASY),
+    nameEmit: getRegexValue(NAME_EMIT),
+    address: getRegexValue(ADRESS).replace(/\n+|&nbsp|;|(  )/g, ''),
+    district: getRegexValue(DISTRICT),
+    zipCode: getRegexValue(ZIP_CODE),
+    city: getRegexValue(CITY)
+      .replace(/\n+|&nbsp|;|(  )/g, '')
+      .trim(),
+    cnpj: getRegexValue(CNPJ),
+    ie: getRegexValue(IE),
   };
   return emitContent;
 }
