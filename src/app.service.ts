@@ -23,8 +23,12 @@ export class AppService {
       return;
     }
     this.notifyExecution(notes);
-    await this.executeLogicMining(notes, 3);
-    logger(`Total de notas ${notes.length} notas`);
+    try {
+      await this.executeLogicMining(notes, 3);
+      logger(`Total de notas ${notes.length} notas`);
+    } catch (error) {
+      logger(error);
+    }
   }
 
   async executeJobPending() {
@@ -34,7 +38,12 @@ export class AppService {
       logger('Nao tem notas para ser processadas');
       return;
     }
-    await this.executeLogicMining(notes, 5);
+    try {
+      await this.executeLogicMining(notes, 5);
+      logger(`Total de notas ${notes.length} notas`);
+    } catch (error) {
+      logger(error);
+    }
     logger(`Total de notas ${notes.length} notas`);
   }
 
