@@ -1,4 +1,5 @@
 import { logger } from 'skyot';
+import { NotesBody } from 'src/app.controller';
 import { resolve_captcha_v2 } from 'src/utils/ResolveCaptcha';
 import {
   SAT_SELECTORS_CONFIG,
@@ -17,7 +18,20 @@ export class PassByHome {
       SAT_SELECTORS_CONFIG.site_url,
       context.code,
     );
-    if (!captcha_token) return logger('Falha ao obter o TOKEN 😤');
+    if (!captcha_token) {
+      const dateProcessed = new Date();
+      const entityNotes: NotesBody = {
+        dateProcessed,
+        status: 'analyse',
+      };
+      await context.repository.update({ code: context.code }, entityNotes);
+      logger(
+        `Nota: ${context.code} status: ${entityNotes.status} date: ${dateProcessed}`,
+      );
+      logger('Falha ao obter o TOKEN 😤');
+      context.browser.close();
+      return;
+    }
     logger('Passou do captcha');
     await context.page.type(SAT_SELECTORS_HOME.inputCode, ' ' + context.code);
     logger('Esta digitando...');
