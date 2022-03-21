@@ -1,9 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { logger } from 'skyot';
 import { NotesBody } from './app.controller';
 import { User } from './database/entity/UserEntity';
 import { Repository } from './database/repository/Repository';
 import { NFCService } from './module/NFC/nfc.service';
+import { SatService } from './module/SAT/sat.service';
 import { diffDays } from './utils/diffTime';
+import { sliceList } from './utils/sliceList';
 
 @Injectable()
 export class AppService {
@@ -12,52 +15,67 @@ export class AppService {
     this.repository = new Repository(User);
   }
 
-  async executeJob(status: string) {
-    NFCService.execute({});
+  async executeJobAnalyse() {
+    logger('Job Analyse comecou a trabalhar');
+    let notes = await this.getNotes('analyse');
+    if (!notes.length) {
+      logger('Nao tem notas para ser processadas');
+      return;
+    }
+    this.notifyExecution(notes);
+    await this.executeLogicMining(notes, 3);
+    logger(`Total de notas ${notes.length} notas`);
+  }
 
-    // let notes = [] as NotesBody[];
-    // try {
-    //   notes = await this.repository.find<NotesBody>({ status });
-    //   notes = this.validPendingNotes(status, notes);
-    // } catch (error) {
-    //   console.log('Acesso banco ', error);
-    //   throw new BadRequestException(error);
-    // }
+  async executeJobPending() {
+    logger('Job Pending comecou a trabalhar');
+    let notes = await this.getNotes('pending');
+    if (!notes.length) {
+      logger('Nao tem notas para ser processadas');
+      return;
+    }
+    await this.executeLogicMining(notes, 5);
+    logger(`Total de notas ${notes.length} notas`);
+  }
 
-    // if (!notes.length) {
-    //   logger('Nao tem notas para ser processadas');
-    //   return;
-    // }
+  private async executeLogicMining(notes: NotesBody[], numberSlice: number) {
+    const notesSlice = sliceList(notes, numberSlice);
+    let notesPromise = [];
+    for (let [index, noteSlice] of notesSlice.entries()) {
+      logger(
+        `Job esta processando o lote ${index + 1} de ${
+          notesSlice.length
+        } notas`,
+      );
+      try {
+        for (let body of noteSlice) {
+          if (this.isSatNote(body.code)) {
+            notesPromise.push(SatService.execute(body));
+          }
+          if (this.isNFCNote(body.code)) {
+            notesPromise.push(NFCService.execute(body));
+          }
+        }
 
-    // this.notifyExecution(notes);
+        await Promise.all(notesPromise);
+        notesPromise = [];
+      } catch (error) {
+        console.log('Execução loop => ', error);
+        throw new BadRequestException(error);
+      }
+    }
+  }
 
-    // const notesSlice = sliceList(notes, 3);
-    // let notesPromise = [];
-    // for (let [index, noteSlice] of notesSlice.entries()) {
-    //   logger(
-    //     `Job esta processando o lote ${index + 1} de ${
-    //       notesSlice.length
-    //     } notas`,
-    //   );
-    //   try {
-    //     for (let body of notes) {
-    //       // if (this.isSatNote(body.code)) {
-    //       //   notesPromise.push(SatService.execute(body));
-    //       // }
-    //       if (this.isNFCNote('35220362545579001105650100002830451107855273')) {
-    //         notesPromise.push(NFCService.execute(body));
-    //       }
-    //     }
-
-    //     await Promise.all(notesPromise);
-    //     notesPromise = [];
-    //   } catch (error) {
-    //     console.log('Execução loop => ', error);
-    //     throw new BadRequestException(error);
-    //   }
-    // }
-
-    // logger(`Total de notas ${notes.length} notas`);
+  private async getNotes(status: string) {
+    let notes: NotesBody[] = [];
+    try {
+      notes = await this.repository.find<NotesBody>({ status });
+      notes = this.validPendingNotes(status, notes);
+    } catch (error) {
+      console.log('Acesso banco ', error);
+      throw new BadRequestException(error);
+    }
+    return notes;
   }
 
   private notifyExecution(notes: NotesBody[]) {
@@ -81,11 +99,11 @@ export class AppService {
     return notes;
   }
 
-  isSatNote(code) {
+  private isSatNote(code) {
     return Boolean(this.typeNote(code) == '59');
   }
 
-  isNFCNote(code) {
+  private isNFCNote(code) {
     return Boolean(this.typeNote(code) == '65');
   }
 

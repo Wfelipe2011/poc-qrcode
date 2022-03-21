@@ -9,7 +9,7 @@ export interface NotesBody {
   email?: string;
   dateProcessed?: Date;
   dateCreated?: string;
-  status?: 'success' | 'process' | 'pending' | 'invalid';
+  status?: 'analyse' | 'success' | 'process' | 'pending' | 'invalid';
   note?: any;
 }
 
@@ -22,13 +22,13 @@ export class AppController {
 
   @Get('notes')
   async startNotes() {
-    this.appService.executeJob('analyse');
+    this.appService.executeJobAnalyse();
     return `Job está processando notas`;
   }
 
   @Get('notes-pending')
   async startNotesPending() {
-    this.appService.executeJob('pending');
+    this.appService.executeJobPending();
     return `Job está processando as notas pending`;
   }
 }

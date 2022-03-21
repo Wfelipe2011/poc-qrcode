@@ -16,14 +16,10 @@ export class NFCService {
   }
 
   static async execute({ code }: NotesBody) {
-    const entity = await NFCService.factoryNFCService(
-      '35220362545579001105650100002830451107855273',
-    );
+    const entity = await NFCService.factoryNFCService(code);
     await PassByHome.execute(entity);
     await MiningByNotes.execute(entity);
   }
-
-  // <label>CEP<\/label>\n.+?<\/span>
 
   private static async factoryNFCService(code: string) {
     const browser = await puppeteer.launch({

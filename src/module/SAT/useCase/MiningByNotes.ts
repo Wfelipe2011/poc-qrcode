@@ -28,6 +28,12 @@ export class MiningByNotes {
       context.browser.close();
     } catch (error) {
       logger('Erro ao minerar html');
+      const dateProcessed = new Date();
+      const entityNotes: NotesBody = {
+        dateProcessed,
+        status: 'analyse',
+      };
+      await context.repository.update({ code: context.code }, entityNotes);
       throw new BadRequestException(error);
     }
   }

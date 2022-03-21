@@ -16,7 +16,7 @@ export class MiningByNotes {
       await context.page.waitForSelector(NFC_SELECTORS_NOTES.tableItems);
     } catch (error) {
       await MiningByNotes.verifyNote(context);
-      return;
+      context.browser.close();
     }
     logger('Comecou a minerar html...');
     try {
@@ -25,7 +25,6 @@ export class MiningByNotes {
         NFC_SELECTORS_NOTES,
       );
 
-      //navegação
       logger('navegou para pagina de abas');
       await context.page.click(NFC_SELECTORS_NOTES.abas);
       logger('esperando carregar html...');
@@ -55,12 +54,25 @@ export class MiningByNotes {
       context.browser.close();
     } catch (error) {
       logger('Erro ao minerar html');
+      const note = await context.repository.findOne<NotesBody>({
+        code: context.code,
+      });
+      const dateProcessed = new Date();
+      const entityNotes: NotesBody = {
+        dateProcessed,
+        status: 'analyse',
+      };
+      await context.repository.update({ code: context.code }, entityNotes);
+      logger(
+        `Nota: ${context.code} status: ${note.status} date: ${dateProcessed}`,
+      );
+      context.browser.close();
       throw new BadRequestException(error);
     }
   }
 
   private static async verifyNote(context: NFCService) {
-    logger('nota não encontrada');
+    logger('nota nao encontrada');
     const note = await context.repository.findOne<NotesBody>({
       code: context.code,
     });
@@ -73,6 +85,5 @@ export class MiningByNotes {
     logger(
       `Nota: ${context.code} status: ${note.status} date: ${dateProcessed}`,
     );
-    context.browser.close();
   }
 }
