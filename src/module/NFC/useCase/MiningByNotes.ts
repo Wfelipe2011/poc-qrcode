@@ -37,16 +37,17 @@ export class MiningByNotes {
         NFC_SELECTORS_NOTES,
       );
 
-      const entityNotes = {
+      const entityNotes: NotesBody = {
         dateProcessed: new Date(),
         status: 'success',
-        ...treatmentsTableInfo(text),
-        barCode: context.code,
-        emitContent: treatmentsTableEmitent(htmlEmitent),
-        products: treatmentsTableProducts(htmlProduct),
+        note: {
+          ...treatmentsTableInfo(text),
+          barCode: context.code,
+          emitContent: treatmentsTableEmitent(htmlEmitent),
+          products: treatmentsTableProducts(htmlProduct),
+        },
       };
 
-      console.log(entityNotes);
       logger(
         `Salvando no banco a nota ${context.code} as ${entityNotes.dateProcessed}`,
       );
