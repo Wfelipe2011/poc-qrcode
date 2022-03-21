@@ -1,4 +1,5 @@
 import * as puppeteer from 'puppeteer';
+import { logger } from 'skyot';
 import { User } from 'src/database/entity/UserEntity';
 import { Repository } from 'src/database/repository/Repository';
 import { NotesBody } from './../../app.controller';
@@ -22,6 +23,7 @@ export class SatService {
   }
 
   static async execute({ code }: NotesBody) {
+    logger('executando mining Sat');
     const entity = await SatService.factorySatService(code);
     await PassByHome.execute(entity);
     await MiningByNotes.execute(entity);
