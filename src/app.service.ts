@@ -1,16 +1,117 @@
-import { Injectable } from '@nestjs/common';
-import { AxiosAdapter } from './infra/Http/axios.adapter';
-import { JobSchedule } from './infra/job-schedule';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { logger } from 'skyot';
+import { NotesBody } from './app.controller';
+import { User } from './database/entity/UserEntity';
+import { Repository } from './database/repository/Repository';
+import { NFCService } from './module/NFC/nfc.service';
+import { SatService } from './module/SAT/sat.service';
+import { diffDays } from './utils/diffTime';
+import { sliceList } from './utils/sliceList';
 
 @Injectable()
 export class AppService {
-  jobSchedule: JobSchedule;
+  repository: Repository;
   constructor() {
-    this.jobSchedule = new JobSchedule(new AxiosAdapter());
-    this.startJob();
+    this.repository = new Repository(User);
   }
 
-  startJob() {
-    // this.jobSchedule.execute('*/10 6-20 * * 1-5');
+  async executeJobAnalyse() {
+    logger('Job Analyse comecou a trabalhar');
+    let notes = await this.getNotes('analyse');
+    if (!notes.length) {
+      logger('Nao tem notas para ser processadas');
+      return;
+    }
+    this.notifyExecution(notes);
+    await this.executeLogicMining(notes, 3);
+    logger(`Total de notas ${notes.length} notas`);
+  }
+
+  async executeJobPending() {
+    logger('Job Pending comecou a trabalhar');
+    let notes = await this.getNotes('pending');
+    if (!notes.length) {
+      logger('Nao tem notas para ser processadas');
+      return;
+    }
+    await this.executeLogicMining(notes, 5);
+    logger(`Total de notas ${notes.length} notas`);
+  }
+
+  private async executeLogicMining(notes: NotesBody[], numberSlice: number) {
+    const notesSlice = sliceList(notes, numberSlice);
+    let notesPromise = [];
+    for (let [index, noteSlice] of notesSlice.entries()) {
+      logger(
+        `Job esta processando o lote ${index + 1} de ${
+          notesSlice.length
+        } notas`,
+      );
+      try {
+        for (let body of noteSlice) {
+          if (this.isSatNote(body.code)) {
+            notesPromise.push(SatService.execute(body));
+          }
+          if (this.isNFCNote(body.code)) {
+            notesPromise.push(NFCService.execute(body));
+          }
+        }
+
+        await Promise.all(notesPromise);
+        notesPromise = [];
+      } catch (error) {
+        console.log('Execução loop => ', error);
+        throw new BadRequestException(error);
+      }
+    }
+  }
+
+  private async getNotes(status: string) {
+    let notes: NotesBody[] = [];
+    try {
+      notes = await this.repository.find<NotesBody>({ status });
+      notes = this.validPendingNotes(status, notes);
+    } catch (error) {
+      console.log('Acesso banco ', error);
+      throw new BadRequestException(error);
+    }
+    return notes;
+  }
+
+  private notifyExecution(notes: NotesBody[]) {
+    notes.forEach(async (note) => {
+      const dateProcessed = new Date();
+      const entityNotes: NotesBody = {
+        dateProcessed,
+        status: 'process',
+      };
+      await this.repository.update({ code: note.code }, entityNotes);
+    });
+  }
+
+  private validPendingNotes(status: string, notes: NotesBody[]) {
+    if (status === 'pending') {
+      const notesFilter = notes.filter((note) =>
+        this.spentTwoDays(note.dateProcessed, new Date()),
+      );
+      return notesFilter;
+    }
+    return notes;
+  }
+
+  private isSatNote(code) {
+    return Boolean(this.typeNote(code) == '59');
+  }
+
+  private isNFCNote(code) {
+    return Boolean(this.typeNote(code) == '65');
+  }
+
+  private typeNote(code: string) {
+    return `${code[20]}${code[21]}`;
+  }
+
+  private spentTwoDays(dateFrom, dateTo) {
+    return Boolean(diffDays(dateFrom, dateTo) >= 2);
   }
 }

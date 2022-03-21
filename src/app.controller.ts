@@ -1,11 +1,7 @@
-import { BadRequestException, Controller, Get } from '@nestjs/common';
-import { logger } from 'skyot';
+import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
 import { User } from './database/entity/UserEntity';
 import { Repository } from './database/repository/Repository';
-import { SatService } from './module/SAT/sat.service';
-import { diffDays } from './utils/diffTime';
-import { sliceList } from './utils/sliceList';
 
 export interface NotesBody {
   _id?: string;
@@ -13,7 +9,7 @@ export interface NotesBody {
   email?: string;
   dateProcessed?: Date;
   dateCreated?: string;
-  status?: 'success' | 'process' | 'pending' | 'invalid';
+  status?: 'analyse' | 'success' | 'process' | 'pending' | 'invalid';
   note?: any;
 }
 
@@ -26,83 +22,13 @@ export class AppController {
 
   @Get('notes')
   async startNotes() {
-    this.executeJob('analyse');
+    this.appService.executeJobAnalyse();
     return `Job está processando notas`;
   }
 
   @Get('notes-pending')
   async startNotesPending() {
-    this.executeJob('pending');
+    this.appService.executeJobPending();
     return `Job está processando as notas pending`;
-  }
-  // pegar notas com status process
-
-  // passar status para jobwork e salvar banco
-
-  // processar as notas
-
-  async executeJob(status: string) {
-    let notes = [] as NotesBody[];
-    try {
-      notes = await this.repository.find<NotesBody>({ status });
-      notes = this.validPendingNotes(status, notes);
-    } catch (error) {
-      console.log('Acesso banco ', error);
-      throw new BadRequestException(error);
-    }
-
-    if (!notes.length) {
-      logger('Nao tem notas para ser processadas');
-      return;
-    }
-
-    this.notifyExecution(notes);
-
-    const notesSlice = sliceList(notes, 3);
-    let notesPromise = [];
-    for (let [index, noteSlice] of notesSlice.entries()) {
-      logger(
-        `Job esta processando o lote ${index + 1} de ${
-          notesSlice.length
-        } notas`,
-      );
-      try {
-        noteSlice.forEach((body) =>
-          notesPromise.push(SatService.execute(body)),
-        );
-        await Promise.all(notesPromise);
-        notesPromise = [];
-      } catch (error) {
-        console.log('Execução loop => ', error);
-        throw new BadRequestException(error);
-      }
-    }
-
-    logger(`Total de notas ${notes.length} notas`);
-  }
-
-  private notifyExecution(notes: NotesBody[]) {
-    notes.forEach(async (note) => {
-      const dateProcessed = new Date();
-      const entityNotes: NotesBody = {
-        dateProcessed,
-        status: 'process',
-      };
-      await this.repository.update({ code: note.code }, entityNotes);
-    });
-  }
-
-  private validPendingNotes(status: string, notes: NotesBody[]) {
-    if (status === 'pending') {
-      const notesFilter = notes.filter((note) =>
-        this.spentTwoDays(note.dateProcessed, new Date()),
-      );
-      return notesFilter;
-    }
-    return notes;
-  }
-
-  private spentTwoDays(dateFrom, dateTo) {
-    return Boolean(diffDays(dateFrom, dateTo) >= 2);
   }
 }

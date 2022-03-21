@@ -1,6 +1,6 @@
 export function treatmentsTable(obj) {
   function replaceToString(string) {
-    return string.replace(/\t/g, ';').replace(/\n/g, '').split(';');
+    return string.replace(/\t/g, ';').replace(/\n/g, '')?.split(';');
   }
 
   const thead = replaceToString(obj.THEAD);
