@@ -17,6 +17,7 @@ export class MiningByNotes {
     } catch (error) {
       await MiningByNotes.verifyNote(context);
       context.browser.close();
+      return;
     }
     logger('Comecou a minerar html...');
     try {

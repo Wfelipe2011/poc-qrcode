@@ -1,4 +1,5 @@
 import * as puppeteer from 'puppeteer';
+import { logger } from 'skyot';
 import { NotesBody } from 'src/app.controller';
 import { User } from 'src/database/entity/UserEntity';
 import { Repository } from 'src/database/repository/Repository';
@@ -16,6 +17,7 @@ export class NFCService {
   }
 
   static async execute({ code }: NotesBody) {
+    logger('executando mining NFC');
     const entity = await NFCService.factoryNFCService(code);
     await PassByHome.execute(entity);
     await MiningByNotes.execute(entity);
