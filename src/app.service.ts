@@ -1,8 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { logger } from 'skyot';
 import { NotesBody } from './app.controller';
-import { User } from './database/entity/UserEntity';
-import { Repository } from './database/repository/Repository';
+import { Notes } from './database/entity/NotesEntity';
+import { NotesRepository } from './database/repository/notes.repository';
 import { NFCService } from './module/NFC/nfc.service';
 import { SatService } from './module/SAT/sat.service';
 import { diffDays } from './utils/diffTime';
@@ -10,9 +10,9 @@ import { sliceList } from './utils/sliceList';
 
 @Injectable()
 export class AppService {
-  repository: Repository;
+  repository: NotesRepository;
   constructor() {
-    this.repository = new Repository(User);
+    this.repository = new NotesRepository(Notes);
   }
 
   async executeJobAnalyse() {

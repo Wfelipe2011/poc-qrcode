@@ -1,7 +1,7 @@
 import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
-import { User } from './database/entity/UserEntity';
-import { Repository } from './database/repository/Repository';
+import { Notes } from './database/entity/NotesEntity';
+import { NotesRepository } from './database/repository/notes.repository';
 
 export interface NotesBody {
   _id?: string;
@@ -15,9 +15,9 @@ export interface NotesBody {
 
 @Controller()
 export class AppController {
-  repository: Repository;
+  repository: NotesRepository;
   constructor(private readonly appService: AppService) {
-    this.repository = new Repository(User);
+    this.repository = new NotesRepository(Notes);
   }
 
   @Get('notes')

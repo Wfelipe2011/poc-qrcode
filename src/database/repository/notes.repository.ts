@@ -1,8 +1,8 @@
 import { BadRequestException } from '@nestjs/common';
 import mongoose from 'mongoose';
-import { ICustomerCaseRepository } from 'src/interface/ICustomerCaseRepository';
+import { INotesRepository } from 'src/interface/NotesRepository.interface';
 
-export class Repository implements ICustomerCaseRepository {
+export class NotesRepository implements INotesRepository {
   constructor(private entity: mongoose.Model<any, {}, {}, {}>) {}
 
   async find<T>(filter = {}, obj = {}): Promise<T[]> {

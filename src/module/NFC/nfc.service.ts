@@ -1,19 +1,19 @@
 import * as puppeteer from 'puppeteer';
 import { logger } from 'skyot';
 import { NotesBody } from 'src/app.controller';
-import { User } from 'src/database/entity/UserEntity';
-import { Repository } from 'src/database/repository/Repository';
+import { Notes } from 'src/database/entity/NotesEntity';
+import { NotesRepository } from 'src/database/repository/notes.repository';
 import { MiningByNotes } from './useCase/MiningByNotes';
 import { PassByHome } from './useCase/PassByHome';
 
 export class NFCService {
-  repository: Repository;
+  repository: NotesRepository;
   constructor(
     readonly code: string,
     readonly page: puppeteer.Page,
     readonly browser: puppeteer.Browser,
   ) {
-    this.repository = new Repository(User);
+    this.repository = new NotesRepository(Notes);
   }
 
   static async execute({ code }: NotesBody) {

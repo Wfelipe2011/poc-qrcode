@@ -1,10 +1,11 @@
 import mongoose from 'mongoose';
-export interface IUser {
-  name: string;
-}
 
-const CodeEntity = {
-  email: {
+const NotesEntity = {
+  key: {
+    type: String,
+    required: true,
+  },
+  clientId: {
     type: String,
     required: true,
   },
@@ -19,11 +20,11 @@ const CodeEntity = {
     type: Date,
   },
   dateCreated: {
-    type: String,
+    type: Date,
   },
   note: {
     type: Object,
   },
 };
 
-export const User = mongoose.model('user', new mongoose.Schema(CodeEntity));
+export const Notes = mongoose.model('notes', new mongoose.Schema(NotesEntity));
