@@ -39,7 +39,7 @@ export class AppService {
       return;
     }
     try {
-      await this.executeLogicMining(notes, 5);
+      await this.executeLogicMining(notes, 3);
       logger(`Total de notas ${notes.length} notas`);
     } catch (error) {
       logger(error);
@@ -76,15 +76,14 @@ export class AppService {
   }
 
   private async getNotes(status: string) {
-    let notes: NotesBody[] = [];
     try {
-      notes = await this.repository.find<NotesBody>({ status });
-      notes = this.validPendingNotes(status, notes);
+      const notesAll = await this.repository.find<NotesBody>({ status });
+      const firstSixNotes = notesAll?.splice(0, 6) || [];
+      return this.validPendingNotes(status, firstSixNotes);
     } catch (error) {
       console.log('Acesso banco ', error);
       throw new BadRequestException(error);
     }
-    return notes;
   }
 
   private notifyExecution(notes: NotesBody[]) {
@@ -99,6 +98,7 @@ export class AppService {
   }
 
   private validPendingNotes(status: string, notes: NotesBody[]) {
+    if (!notes.length) return notes;
     if (status === 'pending') {
       const notesFilter = notes.filter((note) =>
         this.spentTwoDays(note.dateProcessed, new Date()),
