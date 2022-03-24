@@ -98,4 +98,42 @@ function dataMining(SELECTORS_NOTES: {
   };
 }
 
-export { dataMining, insertCaptchaCode, newNotesEntities, submitHome };
+function miningGtinCode(SAT_SELECTORS_DETALHE) {
+  const tableNodes = document.querySelector(
+    SAT_SELECTORS_DETALHE.tableProduct,
+  ).childNodes;
+
+  let table = {};
+  let obj = {};
+  for (let node of tableNodes) {
+    for (let [index, n] of node.childNodes.entries()) {
+      if (n.nodeName !== '#text') obj[n.nodeName + index] = n.innerText;
+    }
+    if (node.nodeName !== '#text') table[node.nodeName] = obj;
+  }
+  const tbody = table['TBODY'];
+  const produtos = [];
+  // oegar cod e enan
+  for (let item in table['TBODY']) {
+    const list = tbody[item].split(/\t/).slice(6, 8);
+    produtos.push({ COD: list[0]?.trim(), GTIN: list[1]?.trim() });
+  }
+  return produtos;
+}
+
+function setGtinProductsNotes(entityNotes: NotesBody, listGtin: any[]) {
+  for (let product of entityNotes.note.products) {
+    const filterList = listGtin?.filter((item) => item.COD == product.COD);
+    const value = filterList?.map((r) => r.GTIN).join() || null;
+    product.GTIN = value;
+  }
+}
+
+export {
+  dataMining,
+  insertCaptchaCode,
+  newNotesEntities,
+  submitHome,
+  miningGtinCode,
+  setGtinProductsNotes,
+};

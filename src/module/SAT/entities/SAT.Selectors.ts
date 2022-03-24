@@ -25,3 +25,9 @@ export enum SAT_SELECTORS_CONFIG {
   site_key = '6LeEy8wUAAAAAHN6Wu2rNdku25fyHUVgovX-rJqM',
   site_url = 'https://satsp.fazenda.sp.gov.br/COMSAT/Public/ConsultaPublica/ConsultaPublicaCfe.aspx',
 }
+
+export enum SAT_SELECTORS_DETALHE {
+  inputDetalhe = '[id="conteudo_btnDetalhe"]',
+  abaProduct = '[id="conteudo_tabProdutoServico"]',
+  tableProduct = '#conteudo_grvProdutosServicos',
+}

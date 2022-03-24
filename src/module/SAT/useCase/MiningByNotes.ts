@@ -1,9 +1,17 @@
 import { BadRequestException } from '@nestjs/common';
 import { logger } from 'skyot';
 import { NotesBody } from 'src/app.controller';
-import { SAT_SELECTORS_NOTES } from '../entities/SAT.Selectors';
+import {
+  SAT_SELECTORS_DETALHE,
+  SAT_SELECTORS_NOTES,
+} from '../entities/SAT.Selectors';
 import { SatService } from '../sat.service';
-import { dataMining, newNotesEntities } from './evaluteFunctions';
+import {
+  dataMining,
+  miningGtinCode,
+  newNotesEntities,
+  setGtinProductsNotes,
+} from './evaluteFunctions';
 
 export class MiningByNotes {
   static async execute(context: SatService) {
@@ -20,6 +28,23 @@ export class MiningByNotes {
         SAT_SELECTORS_NOTES,
       );
       const entityNotes = newNotesEntities(htmlMining);
+
+      logger('navegou para pagina de abas');
+      await context.page.click(SAT_SELECTORS_DETALHE.inputDetalhe);
+      logger('esperando carregar html...');
+      await context.page.waitForSelector(SAT_SELECTORS_DETALHE.abaProduct);
+      await context.page.click(SAT_SELECTORS_DETALHE.abaProduct);
+      logger('esperando carregar html...');
+      await context.page.waitForSelector(SAT_SELECTORS_DETALHE.tableProduct);
+      logger('Comecou a minerar html...');
+
+      let listGtin = await context.page.evaluate(
+        miningGtinCode,
+        SAT_SELECTORS_DETALHE,
+      );
+
+      setGtinProductsNotes(entityNotes, listGtin);
+
       logger(
         `Salvando no banco a nota ${context.code} as ${entityNotes.dateProcessed}`,
       );
