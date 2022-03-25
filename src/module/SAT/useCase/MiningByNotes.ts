@@ -31,10 +31,10 @@ export class MiningByNotes {
 
       logger('navegou para pagina de abas');
       await context.page.click(SAT_SELECTORS_DETALHE.inputDetalhe);
-      logger('esperando carregar html...');
+      logger('esperando carregar tabela...');
       await context.page.waitForSelector(SAT_SELECTORS_DETALHE.abaProduct);
       await context.page.click(SAT_SELECTORS_DETALHE.abaProduct);
-      logger('esperando carregar html...');
+      logger('esperando carregar produtos...');
       await context.page.waitForSelector(SAT_SELECTORS_DETALHE.tableProduct);
       logger('Comecou a minerar html...');
 

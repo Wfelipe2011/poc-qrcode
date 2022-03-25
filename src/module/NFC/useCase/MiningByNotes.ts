@@ -31,9 +31,17 @@ export class MiningByNotes {
       logger('esperando carregar html...');
       await context.page.waitForSelector(NFC_SELECTORS_NOTES.tableEmitent);
       logger('Comecou a minerar html...');
-      let htmlEmitent = await context.page.evaluate(
-        (NFC_SELECTORS_NOTES) =>
-          document.querySelector(NFC_SELECTORS_NOTES.tableEmitent).innerHTML,
+      let { htmlEmitent, tableProducts } = await context.page.evaluate(
+        (NFC_SELECTORS_NOTES) => {
+          const htmlEmitent = document.querySelector(
+            NFC_SELECTORS_NOTES.tableEmitent,
+          ).innerHTML;
+          const tableProducts = document.querySelector(
+            '#Conteudo_pnlNFe_tabProdServ',
+          ).innerHTML;
+
+          return { htmlEmitent, tableProducts };
+        },
         NFC_SELECTORS_NOTES,
       );
 
@@ -47,6 +55,18 @@ export class MiningByNotes {
           products: treatmentsTableProducts(htmlProduct),
         },
       };
+
+      for (let product of entityNotes.note.products) {
+        product.GTIN = getEANValue(product['DESCRIÇÃO'], tableProducts);
+      }
+
+      function getEANValue(value, html) {
+        const expresion = `${value}.*?<label>Código EAN Comercial<\/label>.*?<span>(.*?)<\/span>`;
+        const regex = new RegExp(expresion, 's');
+        console.log(regex);
+        console.log(regex.exec(tableProducts)[1]);
+        return regex.exec(html)[1];
+      }
 
       logger(
         `Salvando no banco a nota ${context.code} as ${entityNotes.dateProcessed}`,
