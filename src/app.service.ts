@@ -109,9 +109,8 @@ export class AppService {
     this.browser = await puppeteer.launch({
       headless: false,
       ignoreHTTPSErrors: true,
-      defaultViewport: null,
       slowMo: 150,
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--start-maximized', '--enable-features=NetworkService '],
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--enable-features=NetworkService '],
     });
   }
 
