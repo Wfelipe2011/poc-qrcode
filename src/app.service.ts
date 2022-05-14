@@ -107,7 +107,7 @@ export class AppService {
 
   private async factoryBrowserService() {
     this.browser = await puppeteer.launch({
-      headless: true,
+      headless: false,
       ignoreHTTPSErrors: true,
       defaultViewport: null,
       slowMo: 150,
