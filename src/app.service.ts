@@ -15,10 +15,10 @@ export class AppService {
   browser: puppeteer.Browser;
   constructor() {
     this.repository = new NotesRepository(Notes);
-    this.factoryBrowserService();
   }
 
   async executeJobAnalyse() {
+    await this.factoryBrowserService();
     logger('Job Analyse comecou a trabalhar');
     let notes = await this.getNotes('analyse');
     if (!notes.length) {
@@ -35,6 +35,7 @@ export class AppService {
   }
 
   async executeJobPending() {
+    await this.factoryBrowserService();
     logger('Job Pending comecou a trabalhar');
     let notes = await this.getNotes('pending');
     if (!notes.length) {
@@ -106,12 +107,19 @@ export class AppService {
   }
 
   private async factoryBrowserService() {
-    this.browser = await puppeteer.launch({
-      headless: false,
-      ignoreHTTPSErrors: true,
-      slowMo: 150,
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--enable-features=NetworkService '],
-    });
+    if (this.browser) return;
+    logger('Iniciando browser');
+    try {
+      this.browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true,
+        slowMo: 150,
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--enable-features=NetworkService '],
+      });
+    } catch (error) {
+      logger('Error ao iniciar browser');
+      logger(error);
+    }
   }
 
   private isSatNote(code) {
