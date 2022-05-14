@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import * as puppeteer from 'puppeteer';
 import { logger } from 'skyot';
 import { NotesBody } from './app.controller';
 import { Notes } from './database/entity/NotesEntity';
@@ -11,8 +12,10 @@ import { sliceList } from './utils/sliceList';
 @Injectable()
 export class AppService {
   repository: NotesRepository;
+  browser: puppeteer.Browser;
   constructor() {
     this.repository = new NotesRepository(Notes);
+    this.factoryBrowserService();
   }
 
   async executeJobAnalyse() {
@@ -51,18 +54,14 @@ export class AppService {
     const notesSlice = sliceList(notes, numberSlice);
     let notesPromise = [];
     for (let [index, noteSlice] of notesSlice.entries()) {
-      logger(
-        `Job esta processando o lote ${index + 1} de ${
-          notesSlice.length
-        } notas`,
-      );
+      logger(`Job esta processando o lote ${index + 1} de ${notesSlice.length} notas`);
       try {
         for (let body of noteSlice) {
           if (this.isSatNote(body.code)) {
-            notesPromise.push(SatService.execute(body));
+            notesPromise.push(SatService.execute(body, this.browser));
           }
           if (this.isNFCNote(body.code)) {
-            notesPromise.push(NFCService.execute(body));
+            notesPromise.push(NFCService.execute(body, this.browser));
           }
         }
 
@@ -100,12 +99,20 @@ export class AppService {
   private validPendingNotes(status: string, notes: NotesBody[]) {
     if (!notes.length) return notes;
     if (status === 'pending') {
-      const notesFilter = notes.filter((note) =>
-        this.spentTwoDays(note.dateProcessed, new Date()),
-      );
+      const notesFilter = notes.filter((note) => this.spentTwoDays(note.dateProcessed, new Date()));
       return notesFilter;
     }
     return notes;
+  }
+
+  private async factoryBrowserService() {
+    this.browser = await puppeteer.launch({
+      headless: true,
+      ignoreHTTPSErrors: true,
+      defaultViewport: null,
+      slowMo: 150,
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--start-maximized', '--enable-features=NetworkService '],
+    });
   }
 
   private isSatNote(code) {

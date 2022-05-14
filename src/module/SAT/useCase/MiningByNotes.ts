@@ -1,17 +1,9 @@
 import { BadRequestException } from '@nestjs/common';
 import { logger } from 'skyot';
 import { NotesBody } from 'src/app.controller';
-import {
-  SAT_SELECTORS_DETALHE,
-  SAT_SELECTORS_NOTES,
-} from '../entities/SAT.Selectors';
+import { SAT_SELECTORS_DETALHE, SAT_SELECTORS_NOTES } from '../entities/SAT.Selectors';
 import { SatService } from '../sat.service';
-import {
-  dataMining,
-  miningGtinCode,
-  newNotesEntities,
-  setGtinProductsNotes,
-} from './evaluteFunctions';
+import { dataMining, miningGtinCode, newNotesEntities, setGtinProductsNotes } from './evaluteFunctions';
 
 export class MiningByNotes {
   static async execute(context: SatService) {
@@ -23,10 +15,7 @@ export class MiningByNotes {
     }
     logger('Comecou a minerar html...');
     try {
-      let htmlMining = await context.page.evaluate(
-        dataMining,
-        SAT_SELECTORS_NOTES,
-      );
+      let htmlMining = await context.page.evaluate(dataMining, SAT_SELECTORS_NOTES);
       const entityNotes = newNotesEntities(htmlMining);
 
       logger('navegou para pagina de abas');
@@ -38,19 +27,14 @@ export class MiningByNotes {
       await context.page.waitForSelector(SAT_SELECTORS_DETALHE.tableProduct);
       logger('Comecou a minerar html...');
 
-      let listGtin = await context.page.evaluate(
-        miningGtinCode,
-        SAT_SELECTORS_DETALHE,
-      );
+      let listGtin = await context.page.evaluate(miningGtinCode, SAT_SELECTORS_DETALHE);
 
       setGtinProductsNotes(entityNotes, listGtin);
 
-      logger(
-        `Salvando no banco a nota ${context.code} as ${entityNotes.dateProcessed}`,
-      );
+      logger(`Salvando no banco a nota ${context.code} as ${entityNotes.dateProcessed}`);
       await context.repository.update({ code: context.code }, entityNotes);
       logger(`Salvo com sucesso a nota ${context.code}`);
-      context.browser.close();
+      context.page.close();
     } catch (error) {
       logger('Erro ao minerar html');
       const dateProcessed = new Date();
@@ -75,9 +59,7 @@ export class MiningByNotes {
       status: note.status === 'pending' ? 'invalid' : 'pending',
     };
     await context.repository.update({ code: context.code }, entityNotes);
-    logger(
-      `Nota: ${context.code} status: ${note.status} date: ${dateProcessed}`,
-    );
-    context.browser.close();
+    logger(`Nota: ${context.code} status: ${note.status} date: ${dateProcessed}`);
+    context.page.close();
   }
 }

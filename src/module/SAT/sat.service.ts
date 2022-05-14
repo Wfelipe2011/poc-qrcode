@@ -9,38 +9,23 @@ import { PassByHome } from './useCase/PassByHome';
 export interface ISatService {
   code: string;
   page: puppeteer.Page;
-  browser: puppeteer.Browser;
 }
 export class SatService {
   repository: NotesRepository;
 
-  constructor(
-    readonly code: string,
-    readonly page: puppeteer.Page,
-    readonly browser: puppeteer.Browser,
-  ) {
+  constructor(readonly code: string, readonly page: puppeteer.Page) {
     this.repository = new NotesRepository(Notes);
   }
 
-  static async execute({ code }: NotesBody) {
+  static async execute({ code }: NotesBody, browser: puppeteer.Browser) {
     logger('executando mining Sat');
-    const entity = await SatService.factorySatService(code);
+    const entity = await SatService.factorySatService(code, browser);
     await PassByHome.execute(entity);
     await MiningByNotes.execute(entity);
   }
 
-  private static async factorySatService(code: string) {
-    const browser = await puppeteer.launch({
-      headless: true,
-      ignoreHTTPSErrors: true,
-      slowMo: 50,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--enable-features=NetworkService ',
-      ],
-    });
+  private static async factorySatService(code: string, browser: puppeteer.Browser) {
     const page = await browser.newPage();
-    return new SatService(code, page, browser);
+    return new SatService(code, page);
   }
 }

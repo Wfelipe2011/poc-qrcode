@@ -1,4 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
+import { logger } from 'skyot';
 import { AppService } from './app.service';
 import { Notes } from './database/entity/NotesEntity';
 import { NotesRepository } from './database/repository/notes.repository';
@@ -22,6 +23,7 @@ export class AppController {
 
   @Get('notes')
   async startNotes() {
+    logger('Job está processando notas');
     this.appService.executeJobAnalyse();
     return `Job está processando notas`;
   }
